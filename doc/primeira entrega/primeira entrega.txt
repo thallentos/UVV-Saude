@@ -1,0 +1,73 @@
+Frontend:
+- Felipe
+- Isaque
+- Gustavo
+
+Backend/BD:
+- Sarmento
+- Eloisa
+- Caique
+
+Doc:
+- Thalles
+- Felipe
+
+--x--
+Arquitetura:
+MVC
+
+Stack:
+PERN
+
+Primeira entrega:
+
+1- Estruturar o frontend
+2- Conectar com o backend
+3.1- Paciente agendar consulta
+3.2- Consulta aparecer para o profissional
+
+--x--
+Telas:
+
+1. Cadastro
+- Infos do usuário/profissional
+- Profissional ou Paciente
+
+2. Login
+
+--x--
+Paciente:
+
+1. Home
+1.1- Criar consulta
+1.2- Agendamentos (atuais ou passados)
+1.3- Perfil do Paciente (nome, idade e sexo)
+
+2. Criar consulta
+2.1- Tipo de atendimento (nutricionista ou psicólogo)
+2.1.1- Visualizar horários
+2.1.2- Agendar
+
+3. Agendamentos
+3.1- Em andamento
+  3.1.2- Mostrar consultas em andamento
+3.2- Histórico
+  3.2.1- Mostrar histórico de consultas (lista)
+    3.2.2- Mostrar histórico de consulta específico
+
+--x--
+Profissional:
+
+1. Agenda
+1.1- Configurar horários (mensal)
+1.2- Agendamentos (atuais ou passados)
+1.3- Solicitações (agendamentos pendentes)
+1.4- Perfil do Profissional (nome, idade e sexo)
+
+2. Configurar horários
+
+3. Agendamentos
+3.1- Atuais
+3.2- Passados
+
+4. Solicitações
