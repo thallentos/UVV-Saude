@@ -1,0 +1,28 @@
+project/
+│
+├── backend/
+│   ├── src/
+│   │   ├── models/
+│   │   ├── controllers/
+│   │   ├── services/
+│   │   ├── routes/
+│   │   ├── middlewares/
+│   │   ├── config/
+│   │   └── app.js
+│   │
+│   ├── package.json
+│   └── .env
+│
+├── frontend/
+│   ├── src/
+│   │   ├── components/
+│   │   ├── pages/
+│   │   ├── services/     ← chamadas API (fetch/axios)
+│   │   ├── assets/
+│   │   └── App.js
+│   │
+│   ├── public/
+│   ├── package.json
+│   └── index.html
+│
+└── README.md
