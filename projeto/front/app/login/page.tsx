@@ -8,26 +8,61 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 
 export default function LoginPage() {
   const router = useRouter()
   const [showPassword, setShowPassword] = useState(false)
-  const [userType, setUserType] = useState<"paciente" | "profissional">("paciente")
   const [formData, setFormData] = useState({
     email: "",
     senha: "",
   })
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    // Simular login
-    if (userType === "paciente") {
-      router.push("/cliente")
-    } else {
-      router.push("/profissional")
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault()
+
+  try {
+    const response = await fetch("http://localhost:3001/auth/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        email: formData.email,
+        senha: formData.senha
+      })
+    })
+
+    const data = await response.json()
+
+
+    if (!response.ok) {
+      if (data.errors) {
+        console.error(data.errors)
+      } else {
+        console.error(data.message)
+      }
+      return
     }
+
+
+    localStorage.setItem("token", data.token)
+
+
+    localStorage.setItem("usuario", JSON.stringify(data.usuario))
+
+  
+    if (data.usuario.tipo_usuario === "PACIENTE") {
+      router.push("/cliente")
+    } else if (data.usuario.tipo_usuario === "PROFISSIONAL") {
+      router.push("/profissional")
+    } else {
+      router.push("/admin")
+    }
+
+  } catch (error) {
+    console.error("Erro ao conectar com o servidor", error)
   }
+}
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
@@ -58,29 +93,6 @@ export default function LoginPage() {
 
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-5">
-              {/* Tipo de Usuário */}
-              <div className="space-y-3">
-                <Label>Entrar como:</Label>
-                <RadioGroup
-                  value={userType}
-                  onValueChange={(v) => setUserType(v as "paciente" | "profissional")}
-                  className="flex gap-4"
-                >
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="paciente" id="paciente" />
-                    <Label htmlFor="paciente" className="cursor-pointer font-normal">
-                      Paciente
-                    </Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="profissional" id="profissional" />
-                    <Label htmlFor="profissional" className="cursor-pointer font-normal">
-                      Profissional
-                    </Label>
-                  </div>
-                </RadioGroup>
-              </div>
-
               {/* Email */}
               <div className="space-y-2">
                 <Label htmlFor="email">E-mail</Label>
