@@ -12,7 +12,11 @@ export default function HomePage() {
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary">
               <Heart className="h-5 w-5 text-primary-foreground" />
             </div>
+<<<<<<< HEAD
             <span className="text-lg font-bold text-foreground">UVV Saúde</span>
+=======
+            <span className="text-lg font-bold text-foreground">UVV Health</span>
+>>>>>>> tela-login
           </div>
           <div className="flex items-center gap-3">
             <Button variant="ghost" asChild>
@@ -106,7 +110,11 @@ export default function HomePage() {
       {/* Footer */}
       <footer className="border-t border-border bg-card py-6">
         <p className="text-center text-sm text-muted-foreground">
+<<<<<<< HEAD
           UVV Saúde &copy; 2026 - Todos os direitos reservados
+=======
+          UVV Health &copy; 2026 - Todos os direitos reservados
+>>>>>>> tela-login
         </p>
       </footer>
     </main>
