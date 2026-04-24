@@ -1,0 +1,19 @@
+# Dependências
+back/node_modules/
+front/node_modules/
+
+# Ambiente
+back/.env
+front/.env
+
+# Build
+back/dist/
+front/dist/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
