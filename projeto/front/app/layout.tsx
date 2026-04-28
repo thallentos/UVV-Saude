@@ -11,11 +11,7 @@ const _dmSans = DM_Sans({
 })
 
 export const metadata: Metadata = {
-<<<<<<< HEAD
   title: "UVV Saúde - Gestao de Saude Inteligente",
-=======
-  title: "UVV Health - Gestao de Saude Inteligente",
->>>>>>> tela-login
   description:
     "Plataforma completa para profissionais de saude e seus pacientes. Agenda, prontuario, faturamento e muito mais.",
 }

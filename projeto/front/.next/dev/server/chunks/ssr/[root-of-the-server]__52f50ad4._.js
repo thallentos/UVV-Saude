@@ -129,7 +129,7 @@ function HomePage() {
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                     className: "text-lg font-bold text-foreground",
-                                    children: "UVV Health"
+                                    children: "UVV Saúde"
                                 }, void 0, false, {
                                     fileName: "[project]/projeto/front/app/page.tsx",
                                     lineNumber: 15,
@@ -486,7 +486,7 @@ function HomePage() {
                 className: "border-t border-border bg-card py-6",
                 children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                     className: "text-center text-sm text-muted-foreground",
-                    children: "UVV Health © 2026 - Todos os direitos reservados"
+                    children: "UVV Saúde © 2026 - Todos os direitos reservados"
                 }, void 0, false, {
                     fileName: "[project]/projeto/front/app/page.tsx",
                     lineNumber: 108,

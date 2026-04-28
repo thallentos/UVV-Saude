@@ -1,6 +1,68 @@
-[00:00:01.599] Server  LOG     ✓ Ready in 1387ms
-[00:00:18.399] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[00:00:18.512] Browser LOG     %c[Vercel Web Analytics]%c Debug mode is enabled by default in development. No requests will be sent to the server. color: rgb(120, 120, 120) color: inherit
-[00:00:18.512] Browser LOG     %c[Vercel Web Analytics]%c Running queued event color: rgb(120, 120, 120) color: inherit pageview {"path":"/","route":"/"}
-[00:00:18.512] Browser LOG     %c[Vercel Web Analytics]%c [view] http://localhost:3000/ color: rgb(120, 120, 120) color: inherit {"dp":"/","o":"http://localhost:3000/","r":"","sdkn":"@vercel/analytics/next","sdkv":"1.6.1","sv":"0.1.3","ts":1777030559449} /_vercel/insights/view
-[00:00:20.520] Browser LOG     %c[Vercel Web Analytics]%c [view] http://localhost:3000/cadastro color: rgb(120, 120, 120) color: inherit {"dp":"/cadastro","o":"http://localhost:3000/cadastro","sdkn":"@vercel/analytics/next","sdkv":"1.6.1","sv":"0.1.3","ts":1777030561450} /_vercel/insights/view
+[00:00:02.338] Server  LOG     ✓ Ready in 1680ms
+[00:00:03.742] Server  ERROR   ⨯ ./projeto/front/app/page.tsx:15:2
+Parsing ecmascript source code failed
+  13 |               <Heart className="h-5 w-5 text-primary-foreground" />
+  14 |             </div>
+> 15 | <<<<<<< HEAD
+     |  ^^
+  16 |             <span className="text-lg font-bold text-foreground">UVV Saúde</span>
+  17 | =======
+  18 |             <span className="text-lg font-bold text-foreground">UVV Health</span>
+
+Expression expected
+
+
+
+./projeto/front/app/page.tsx:15:4
+Parsing ecmascript source code failed
+  13 |               <Heart className="h-5 w-5 text-primary-foreground" />
+  14 |             </div>
+> 15 | <<<<<<< HEAD
+     |    ^^
+  16 |             <span className="text-lg font-bold text-foreground">UVV Saúde</span>
+  17 | =======
+  18 |             <span className="text-lg font-bold text-foreground">UVV Health</span>
+
+Expression expected
+
+
+[00:00:04.518] Browser ERROR   uncaughtError: Error: ./projeto/front/app/page.tsx:15:4
+Parsing ecmascript source code failed
+  13 |               <Heart className="h-5 w-5 text-primary-foreground" />
+  14 |             </div>
+> 15 | <<<<<<< HEAD
+     |    ^^
+  16 |             <span className="text-lg font-bold text-foreground">UVV Saúde</span>
+  17 | =======
+  18 |             <span className="text-lg font-bold text-foreground">UVV Health</span>
+
+Expression expected
+
+
+[00:00:04.971] Browser ERROR   ./projeto/front/app/page.tsx:15:4
+Parsing ecmascript source code failed
+  13 |               <Heart className="h-5 w-5 text-primary-foreground" />
+  14 |             </div>
+> 15 | <<<<<<< HEAD
+     |    ^^
+  16 |             <span className="text-lg font-bold text-foreground">UVV Saúde</span>
+  17 | =======
+  18 |             <span className="text-lg font-bold text-foreground">UVV Health</span>
+
+Expression expected
+[00:00:04.971] Browser ERROR   ./projeto/front/app/page.tsx:15:4
+Parsing ecmascript source code failed
+  13 |               <Heart className="h-5 w-5 text-primary-foreground" />
+  14 |             </div>
+> 15 | <<<<<<< HEAD
+     |    ^^
+  16 |             <span className="text-lg font-bold text-foreground">UVV Saúde</span>
+  17 | =======
+  18 |             <span className="text-lg font-bold text-foreground">UVV Health</span>
+
+Expression expected
+[00:00:12.185] Server  LOG     ✓ Compiled in 214ms
+[00:00:13.848] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:00:14.981] Browser LOG     %c[Vercel Web Analytics]%c Debug mode is enabled by default in development. No requests will be sent to the server. color: rgb(120, 120, 120) color: inherit
+[00:00:14.982] Browser LOG     %c[Vercel Web Analytics]%c Running queued event color: rgb(120, 120, 120) color: inherit pageview {"path":"/","route":"/"}
+[00:00:14.982] Browser LOG     %c[Vercel Web Analytics]%c [view] http://localhost:3001/ color: rgb(120, 120, 120) color: inherit {"dp":"/","o":"http://localhost:3001/","sdkn":"@vercel/analytics/next","sdkv":"1.6.1","sv":"0.1.3","ts":1777419934092} /_vercel/insights/view

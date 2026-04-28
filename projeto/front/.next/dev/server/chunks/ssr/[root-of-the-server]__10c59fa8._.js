@@ -76,7 +76,7 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$node_mod
 ;
 ;
 const metadata = {
-    title: "UVV Health - Gestao de Saude Inteligente",
+    title: "UVV Saúde - Gestao de Saude Inteligente",
     description: "Plataforma completa para profissionais de saude e seus pacientes. Agenda, prontuario, faturamento e muito mais."
 };
 const viewport = {
