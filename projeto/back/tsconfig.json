@@ -1,0 +1,37 @@
+{
+  "compilerOptions": {
+    // ── Onde estão os fontes e onde vai o compilado ──────────────────────────
+    "rootDir": "./src",
+    "outDir": "./dist",
+
+    // ── Configuração de módulo para Node.js ──────────────────────────────────
+    "module": "NodeNext",       // diz que é Node moderno (ESM/CJS híbrido)
+    "moduleResolution": "NodeNext", // obrigatório quando module é NodeNext
+    "target": "ES2022",         // ES2022 é o suficiente — esnext pode ser instável
+
+    // ── Tipos disponíveis globalmente ────────────────────────────────────────
+    "types": ["node"],          // estava [] — sem isso o process, __dirname etc. não funcionam
+
+    // ── Outputs extras ───────────────────────────────────────────────────────
+    "sourceMap": true,          // mantém — ajuda no debug
+    "declaration": false,       // pode remover — só faz sentido pra libs publicadas no npm
+    "declarationMap": false,    // idem
+
+    // ── Checagens estritas ───────────────────────────────────────────────────
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+
+    // ── Opções de interop e isolamento ───────────────────────────────────────
+    "verbatimModuleSyntax": true,
+    "isolatedModules": true,
+    "moduleDetection": "force",
+    "skipLibCheck": true,
+
+    // ── REMOVIDOS ────────────────────────────────────────────────────────────
+    // "jsx": "react-jsx"  → não é projeto React, causaria erro
+    // "noUncheckedSideEffectImports" → experimental, desnecessário aqui
+  },
+  "include": ["src"],
+  "exclude": ["node_modules", "dist"]
+}
