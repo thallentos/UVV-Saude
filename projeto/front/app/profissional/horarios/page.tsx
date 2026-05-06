@@ -1,12 +1,10 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { ChevronLeft, ChevronRight, Clock, Save, Plus, Trash2, Loader2 } from "lucide-react"
+import { ChevronLeft, ChevronRight, Plus, Trash2, Pencil, Check, X, Loader2, Clock } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Switch } from "@/components/ui/switch"
-import { Label } from "@/components/ui/label"
 import {
   Select,
   SelectContent,
@@ -14,33 +12,32 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog"
 
 const API_URL = "http://localhost:3000"
-
-const diasSemana = [
-  { id: 0, nome: "Domingo", abrev: "Dom" },
-  { id: 1, nome: "Segunda-feira", abrev: "Seg" },
-  { id: 2, nome: "Terça-feira", abrev: "Ter" },
-  { id: 3, nome: "Quarta-feira", abrev: "Qua" },
-  { id: 4, nome: "Quinta-feira", abrev: "Qui" },
-  { id: 5, nome: "Sexta-feira", abrev: "Sex" },
-  { id: 6, nome: "Sábado", abrev: "Sáb" },
-]
-
-const horariosDisponiveis = [
-  "07:00", "07:30", "08:00", "08:30", "09:00", "09:30", "10:00", "10:30",
-  "11:00", "11:30", "12:00", "12:30", "13:00", "13:30", "14:00", "14:30",
-  "15:00", "15:30", "16:00", "16:30", "17:00", "17:30", "18:00", "18:30",
-  "19:00", "19:30", "20:00"
-]
 
 const meses = [
   "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
   "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
 ]
 
-// Slot já salvo no banco
-interface SlotSalvo {
+const diasSemanaAbrev = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"]
+
+const horariosDisponiveis = [
+  "07:00", "07:30", "08:00", "08:30", "09:00", "09:30",
+  "10:00", "10:30", "11:00", "11:30", "12:00", "12:30",
+  "13:00", "13:30", "14:00", "14:30", "15:00", "15:30",
+  "16:00", "16:30", "17:00", "17:30", "18:00", "18:30",
+  "19:00", "19:30", "20:00"
+]
+
+interface Slot {
   id: number
   profissional_id: number
   data_disponivel: string
@@ -48,216 +45,206 @@ interface SlotSalvo {
   status_vaga: "LIVRE" | "OCUPADO"
 }
 
-// Slot local ainda não salvo
-interface SlotLocal {
+interface SlotNovo {
   tempId: string
   horario: string
 }
 
-// Estado por dia da semana
-interface DiaSemanaState {
-  ativo: boolean
-  slotsSalvos: SlotSalvo[]
-  slotsNovos: SlotLocal[]
-  slotsParaDeletar: number[]
+interface DiaInfo {
+  data: string
+  slots: Slot[]
 }
 
-type AgendaSemana = Record<number, DiaSemanaState>
-
-function estadoInicial(): AgendaSemana {
-  const estado: AgendaSemana = {}
-  diasSemana.forEach(d => {
-    estado[d.id] = {
-      ativo: false,
-      slotsSalvos: [],
-      slotsNovos: [],
-      slotsParaDeletar: [],
-    }
-  })
-  return estado
+function getToken(): string {
+  return localStorage.getItem("token") ?? ""
 }
 
-// Monta data no formato YYYY-MM-DD para um dia da semana dentro do mês/ano
-function montarDatas(diaSemana: number, mes: number, ano: number): string[] {
-  const datas: string[] = []
-  const data = new Date(ano, mes, 1)
-  while (data.getMonth() === mes) {
-    if (data.getDay() === diaSemana) {
-      const yyyy = data.getFullYear()
-      const mm = String(data.getMonth() + 1).padStart(2, "0")
-      const dd = String(data.getDate()).padStart(2, "0")
-      datas.push(`${yyyy}-${mm}-${dd}`)
-    }
-    data.setDate(data.getDate() + 1)
+function formatarData(dataStr: string): string {
+  const [ano, mes, dia] = dataStr.split("-")
+  return `${dia}/${mes}/${ano}`
+}
+
+function gerarDiasDoMes(ano: number, mes: number): string[] {
+  const dias: string[] = []
+  const total = new Date(ano, mes + 1, 0).getDate()
+  for (let d = 1; d <= total; d++) {
+    const mm = String(mes + 1).padStart(2, "0")
+    const dd = String(d).padStart(2, "0")
+    dias.push(`${ano}-${mm}-${dd}`)
   }
-  return datas
+  return dias
 }
 
-export default function ConfigurarHorariosPage() {
+function primeiroDiaSemana(ano: number, mes: number): number {
+  return new Date(ano, mes, 1).getDay()
+}
+
+export default function HorariosPage() {
   const [mesAtual, setMesAtual] = useState(() => new Date().getMonth())
   const [anoAtual, setAnoAtual] = useState(() => new Date().getFullYear())
-  const [agenda, setAgenda] = useState<AgendaSemana>(estadoInicial())
+  const [slots, setSlots] = useState<Slot[]>([])
   const [carregando, setCarregando] = useState(true)
+  const [diaSelecionado, setDiaSelecionado] = useState<string | null>(null)
+  const [painelAberto, setPainelAberto] = useState(false)
+  const [slotsNovos, setSlotsNovos] = useState<SlotNovo[]>([])
+  const [editandoId, setEditandoId] = useState<number | null>(null)
+  const [editandoHorario, setEditandoHorario] = useState<string>("")
   const [salvando, setSalvando] = useState(false)
   const [erro, setErro] = useState("")
   const [sucesso, setSucesso] = useState("")
 
-  function getToken(): string {
-    return localStorage.getItem("token") ?? ""
-  }
-
-  const carregarAgenda = useCallback(async () => {
+  const carregarSlots = useCallback(async () => {
     setCarregando(true)
-    setErro("")
     try {
       const res = await fetch(`${API_URL}/api/v1/agenda/minha`, {
         headers: { Authorization: `Bearer ${getToken()}` },
       })
-      if (!res.ok) throw new Error("Erro ao carregar agenda.")
-      const slots: SlotSalvo[] = await res.json()
-
-      // Filtra apenas os slots do mês/ano atual
-      const novoEstado = estadoInicial()
-      slots.forEach(slot => {
-        const data = new Date(slot.data_disponivel + "T00:00:00")
-        if (data.getMonth() === mesAtual && data.getFullYear() === anoAtual) {
-          const diaSemana = data.getDay()
-          novoEstado[diaSemana].ativo = true
-          // Evita duplicar o mesmo horário
-          const jaExiste = novoEstado[diaSemana].slotsSalvos.some(
-            s => s.horario_inicio === slot.horario_inicio
-          )
-          if (!jaExiste) {
-            novoEstado[diaSemana].slotsSalvos.push(slot)
-          }
-        }
-      })
-      setAgenda(novoEstado)
+      if (!res.ok) throw new Error()
+      const data: Slot[] = await res.json()
+      setSlots(data)
     } catch {
-      setErro("Não foi possível carregar sua agenda.")
+      setErro("Não foi possível carregar a agenda.")
     } finally {
       setCarregando(false)
     }
-  }, [mesAtual, anoAtual])
+  }, [])
 
   useEffect(() => {
-    carregarAgenda()
-  }, [carregarAgenda])
+    carregarSlots()
+  }, [carregarSlots])
 
-  function toggleDia(diaId: number) {
-    setAgenda(prev => ({
-      ...prev,
-      [diaId]: {
-        ...prev[diaId],
-        ativo: !prev[diaId].ativo,
-        slotsNovos: !prev[diaId].ativo
-          ? [{ tempId: crypto.randomUUID(), horario: "08:00" }]
-          : prev[diaId].slotsNovos,
-      }
-    }))
+  function slotsDoDia(data: string): Slot[] {
+    return slots.filter(s => {
+      const d = s.data_disponivel.split("T")[0]
+      return d === data
+    }).sort((a, b) => a.horario_inicio.localeCompare(b.horario_inicio))
   }
 
-  function adicionarSlotNovo(diaId: number) {
-    setAgenda(prev => ({
-      ...prev,
-      [diaId]: {
-        ...prev[diaId],
-        slotsNovos: [
-          ...prev[diaId].slotsNovos,
-          { tempId: crypto.randomUUID(), horario: "14:00" }
-        ]
-      }
-    }))
+  function temSlots(data: string): boolean {
+    return slotsDoDia(data).length > 0
   }
 
-  function atualizarSlotNovo(diaId: number, tempId: string, horario: string) {
-    setAgenda(prev => ({
-      ...prev,
-      [diaId]: {
-        ...prev[diaId],
-        slotsNovos: prev[diaId].slotsNovos.map(s =>
-          s.tempId === tempId ? { ...s, horario } : s
-        )
-      }
-    }))
-  }
-
-  function removerSlotNovo(diaId: number, tempId: string) {
-    setAgenda(prev => ({
-      ...prev,
-      [diaId]: {
-        ...prev[diaId],
-        slotsNovos: prev[diaId].slotsNovos.filter(s => s.tempId !== tempId)
-      }
-    }))
-  }
-
-  function marcarParaDeletar(diaId: number, slotId: number) {
-    setAgenda(prev => ({
-      ...prev,
-      [diaId]: {
-        ...prev[diaId],
-        slotsSalvos: prev[diaId].slotsSalvos.filter(s => s.id !== slotId),
-        slotsParaDeletar: [...prev[diaId].slotsParaDeletar, slotId],
-      }
-    }))
-  }
-
-  async function salvar() {
-    setSalvando(true)
+  function abrirDia(data: string) {
+    setDiaSelecionado(data)
+    setSlotsNovos([])
+    setEditandoId(null)
     setErro("")
     setSucesso("")
-    const token = getToken()
+    setPainelAberto(true)
+  }
 
+  function fecharPainel() {
+    setPainelAberto(false)
+    setDiaSelecionado(null)
+    setSlotsNovos([])
+    setEditandoId(null)
+    setErro("")
+    setSucesso("")
+  }
+
+  function adicionarSlotNovo() {
+    setSlotsNovos(prev => [
+      ...prev,
+      { tempId: crypto.randomUUID(), horario: "09:00" }
+    ])
+  }
+
+  function atualizarSlotNovo(tempId: string, horario: string) {
+    setSlotsNovos(prev =>
+      prev.map(s => s.tempId === tempId ? { ...s, horario } : s)
+    )
+  }
+
+  function removerSlotNovo(tempId: string) {
+    setSlotsNovos(prev => prev.filter(s => s.tempId !== tempId))
+  }
+
+  function iniciarEdicao(slot: Slot) {
+    setEditandoId(slot.id)
+    setEditandoHorario(slot.horario_inicio.slice(0, 5))
+  }
+
+  function cancelarEdicao() {
+    setEditandoId(null)
+    setEditandoHorario("")
+  }
+
+  async function salvarEdicao(id: number) {
+    setSalvando(true)
+    setErro("")
     try {
-      // 1. Deletar slots marcados
-      const deletPromises: Promise<Response>[] = []
-      diasSemana.forEach(dia => {
-        agenda[dia.id].slotsParaDeletar.forEach(id => {
-          deletPromises.push(
-            fetch(`${API_URL}/api/v1/agenda/${id}`, {
-              method: "DELETE",
-              headers: { Authorization: `Bearer ${token}` },
-            })
-          )
-        })
+      const res = await fetch(`${API_URL}/api/v1/agenda/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${getToken()}`,
+        },
+        body: JSON.stringify({ horario_inicio: editandoHorario }),
       })
-      await Promise.all(deletPromises)
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.message ?? "Erro ao editar.")
+      setSlots(prev => prev.map(s => s.id === id ? data : s))
+      setEditandoId(null)
+      setSucesso("Horário editado com sucesso!")
+      setTimeout(() => setSucesso(""), 3000)
+    } catch (e: unknown) {
+      setErro(e instanceof Error ? e.message : "Erro ao editar horário.")
+    } finally {
+      setSalvando(false)
+    }
+  }
 
-      // 2. Criar novos slots para todas as datas do mês
-      const criarPromises: Promise<Response>[] = []
-      diasSemana.forEach(dia => {
-        if (!agenda[dia.id].ativo) return
-        const datas = montarDatas(dia.id, mesAtual, anoAtual)
-        agenda[dia.id].slotsNovos.forEach(slot => {
-          datas.forEach(data => {
-            criarPromises.push(
-              fetch(`${API_URL}/api/v1/agenda`, {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                  Authorization: `Bearer ${token}`,
-                },
-                body: JSON.stringify({
-                  data_disponivel: data,
-                  horario_inicio: slot.horario,
-                }),
-              })
-            )
+  async function deletarSlot(id: number) {
+    setSalvando(true)
+    setErro("")
+    try {
+      const res = await fetch(`${API_URL}/api/v1/agenda/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${getToken()}` },
+      })
+      if (!res.ok) throw new Error("Erro ao deletar.")
+      setSlots(prev => prev.filter(s => s.id !== id))
+      setSucesso("Horário removido!")
+      setTimeout(() => setSucesso(""), 3000)
+    } catch {
+      setErro("Erro ao deletar horário.")
+    } finally {
+      setSalvando(false)
+    }
+  }
+
+  async function salvarNovos() {
+    if (slotsNovos.length === 0) return
+    setSalvando(true)
+    setErro("")
+    try {
+      const resultados = await Promise.all(
+        slotsNovos.map(slot =>
+          fetch(`${API_URL}/api/v1/agenda`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${getToken()}`,
+            },
+            body: JSON.stringify({
+              data_disponivel: diaSelecionado,
+              horario_inicio: slot.horario,
+            }),
           })
-        })
-      })
+        )
+      )
 
-      const resultados = await Promise.all(criarPromises)
       const falhas = resultados.filter(r => !r.ok && r.status !== 409)
       if (falhas.length > 0) {
-        setErro(`${falhas.length} slot(s) não puderam ser criados.`)
+        setErro(`${falhas.length} horário(s) não puderam ser criados.`)
       } else {
-        setSucesso("Agenda salva com sucesso!")
-        await carregarAgenda()
+        setSlotsNovos([])
+        setSucesso("Horários salvos com sucesso!")
+        setTimeout(() => setSucesso(""), 3000)
+        await carregarSlots()
       }
     } catch {
-      setErro("Erro ao salvar agenda. Tente novamente.")
+      setErro("Erro ao salvar horários.")
     } finally {
       setSalvando(false)
     }
@@ -273,55 +260,36 @@ export default function ConfigurarHorariosPage() {
     else setMesAtual(m => m + 1)
   }
 
-  if (carregando) {
-    return (
-      <div className="flex h-64 items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    )
-  }
+  const dias = gerarDiasDoMes(anoAtual, mesAtual)
+  const offset = primeiroDiaSemana(anoAtual, mesAtual)
+  const slotsDoMes = slots.filter(s => {
+    const d = s.data_disponivel.split("T")[0] ?? ""
+    return d.startsWith(`${anoAtual}-${String(mesAtual + 1).padStart(2, "0")}`)
+  })
+  const diasComSlots = [...new Set(slotsDoMes.map(s => s.data_disponivel.split("T")[0]))]
+
+  const slotsDiaSelecionado = diaSelecionado ? slotsDoDia(diaSelecionado) : []
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Configurar Horários</h1>
-          <p className="text-muted-foreground">
-            Defina sua disponibilidade para {meses[mesAtual]} de {anoAtual}
-          </p>
-        </div>
-        <Button onClick={salvar} disabled={salvando} className="gap-2">
-          {salvando ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-          {salvando ? "Salvando..." : "Salvar Alterações"}
-        </Button>
+      {/* Header */}
+      <div>
+        <h1 className="text-2xl font-bold text-foreground">Configurar Horários</h1>
+        <p className="text-muted-foreground">
+          Clique em um dia para adicionar ou editar horários
+        </p>
       </div>
 
-      {erro && (
-        <div className="rounded-lg border border-destructive/50 bg-destructive/10 px-4 py-3 text-sm text-destructive">
-          {erro}
-        </div>
-      )}
-      {sucesso && (
-        <div className="rounded-lg border border-green-500/50 bg-green-500/10 px-4 py-3 text-sm text-green-700">
-          {sucesso}
-        </div>
-      )}
-
-      {/* Seletor de Mês */}
+      {/* Navegação do mês */}
       <Card>
         <CardContent className="p-4">
           <div className="flex items-center justify-between">
             <Button variant="outline" size="icon" onClick={mesAnterior}>
               <ChevronLeft className="h-4 w-4" />
             </Button>
-            <div className="text-center">
-              <h2 className="text-lg font-semibold text-foreground">
-                {meses[mesAtual]} {anoAtual}
-              </h2>
-              <p className="text-sm text-muted-foreground">
-                Configure os horários para este mês
-              </p>
-            </div>
+            <h2 className="text-lg font-semibold text-foreground">
+              {meses[mesAtual]} {anoAtual}
+            </h2>
             <Button variant="outline" size="icon" onClick={proximoMes}>
               <ChevronRight className="h-4 w-4" />
             </Button>
@@ -329,66 +297,127 @@ export default function ConfigurarHorariosPage() {
         </CardContent>
       </Card>
 
-      {/* Configuração por Dia da Semana */}
-      <div className="space-y-4">
-        {diasSemana.map((dia) => {
-          const estado = agenda[dia.id]
-          const totalSlots = estado.slotsSalvos.length + estado.slotsNovos.length
-          return (
-            <Card key={dia.id} className={!estado.ativo ? "opacity-60" : ""}>
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <Switch
-                      checked={estado.ativo}
-                      onCheckedChange={() => toggleDia(dia.id)}
-                      id={`dia-${dia.id}`}
-                    />
-                    <Label htmlFor={`dia-${dia.id}`} className="cursor-pointer">
-                      <CardTitle className="text-base">{dia.nome}</CardTitle>
-                    </Label>
-                  </div>
-                  {estado.ativo && (
-                    <Badge variant="secondary">{totalSlots} horário(s)</Badge>
-                  )}
+      {/* Legenda */}
+      <div className="flex items-center gap-4 text-sm text-muted-foreground">
+        <div className="flex items-center gap-2">
+          <div className="h-3 w-3 rounded-full bg-primary" />
+          <span>Com horários</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="h-3 w-3 rounded-full border border-border bg-background" />
+          <span>Sem horários</span>
+        </div>
+      </div>
+
+      {/* Calendário */}
+      {carregando ? (
+        <div className="flex h-64 items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      ) : (
+        <Card>
+          <CardContent className="p-4">
+            {/* Cabeçalho dias da semana */}
+            <div className="mb-2 grid grid-cols-7 gap-1">
+              {diasSemanaAbrev.map(d => (
+                <div key={d} className="text-center text-xs font-medium text-muted-foreground py-1">
+                  {d}
                 </div>
-              </CardHeader>
+              ))}
+            </div>
 
-              {estado.ativo && (
-                <CardContent className="space-y-3 pt-0">
-                  {/* Slots já salvos no banco */}
-                  {estado.slotsSalvos.map(slot => (
-                    <div key={slot.id} className="flex items-center gap-3">
-                      <Clock className="h-4 w-4 text-muted-foreground" />
-                      <span className="w-24 rounded-md border border-input bg-muted px-3 py-2 text-sm text-muted-foreground">
-                        {slot.horario_inicio.slice(0, 5)}
-                      </span>
-                      <Badge variant="secondary" className="text-xs">Salvo</Badge>
-                      {slot.status_vaga === "LIVRE" && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="text-destructive hover:text-destructive"
-                          onClick={() => marcarParaDeletar(dia.id, slot.id)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      )}
-                      {slot.status_vaga === "OCUPADO" && (
-                        <Badge className="bg-yellow-100 text-yellow-700 text-xs">Ocupado</Badge>
-                      )}
-                    </div>
-                  ))}
+            {/* Grid de dias */}
+            <div className="grid grid-cols-7 gap-1">
+              {/* Espaços vazios antes do primeiro dia */}
+              {Array.from({ length: offset }).map((_, i) => (
+                <div key={`empty-${i}`} />
+              ))}
 
-                  {/* Slots novos ainda não salvos */}
-                  {estado.slotsNovos.map(slot => (
-                    <div key={slot.tempId} className="flex items-center gap-3">
-                      <Clock className="h-4 w-4 text-muted-foreground" />
-                      <Select
-                        value={slot.horario}
-                        onValueChange={(v) => atualizarSlotNovo(dia.id, slot.tempId, v)}
-                      >
-                        <SelectTrigger className="w-24">
+              {dias.map(data => {
+                const temSlot = temSlots(data)
+                const diaNum = Number(data.split("-")[2])
+                const ehHoje = data === new Date().toISOString().split("T")[0]
+
+                return (
+                  <button
+                    key={data}
+                    onClick={() => abrirDia(data)}
+                    className={`
+                      relative flex flex-col items-center justify-center rounded-lg p-2 text-sm
+                      transition-all hover:bg-accent hover:text-accent-foreground
+                      ${ehHoje ? "border-2 border-primary font-bold" : "border border-transparent"}
+                      ${diaSelecionado === data ? "bg-primary text-primary-foreground" : ""}
+                    `}
+                  >
+                    <span>{diaNum}</span>
+                    {temSlot && (
+                      <div className={`mt-1 h-1.5 w-1.5 rounded-full ${diaSelecionado === data ? "bg-primary-foreground" : "bg-primary"}`} />
+                    )}
+                  </button>
+                )
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Resumo do mês */}
+      <div className="text-sm text-muted-foreground">
+        {diasComSlots.length === 0
+          ? "Nenhum horário configurado neste mês."
+          : `${diasComSlots.length} dia(s) com horários em ${meses[mesAtual]}.`
+        }
+      </div>
+
+      {/* Painel do dia — Dialog */}
+      <Dialog open={painelAberto} onOpenChange={fecharPainel}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Clock className="h-5 w-5 text-primary" />
+              {diaSelecionado && formatarData(diaSelecionado)}
+            </DialogTitle>
+            <DialogDescription>
+              Gerencie os horários disponíveis para este dia
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            {/* Feedback */}
+            {erro && (
+              <div className="rounded-lg border border-destructive/50 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                {erro}
+              </div>
+            )}
+            {sucesso && (
+              <div className="rounded-lg border border-green-500/50 bg-green-500/10 px-3 py-2 text-sm text-green-700">
+                {sucesso}
+              </div>
+            )}
+
+            {/* Horários salvos */}
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-foreground">
+                Horários salvos
+                {slotsDiaSelecionado.length > 0 && (
+                  <Badge variant="secondary" className="ml-2">
+                    {slotsDiaSelecionado.length}
+                  </Badge>
+                )}
+              </p>
+
+              {slotsDiaSelecionado.length === 0 && (
+                <p className="text-sm text-muted-foreground">
+                  Nenhum horário salvo para este dia.
+                </p>
+              )}
+
+              {slotsDiaSelecionado.map(slot => (
+                <div key={slot.id} className="flex items-center gap-2 rounded-lg border border-border p-2">
+                  {editandoId === slot.id ? (
+                    <>
+                      <Select value={editandoHorario} onValueChange={setEditandoHorario}>
+                        <SelectTrigger className="w-28">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -397,59 +426,116 @@ export default function ConfigurarHorariosPage() {
                           ))}
                         </SelectContent>
                       </Select>
-                      <Badge variant="outline" className="text-xs text-primary">Novo</Badge>
                       <Button
-                        variant="ghost"
                         size="icon"
-                        className="text-destructive hover:text-destructive"
-                        onClick={() => removerSlotNovo(dia.id, slot.tempId)}
+                        variant="ghost"
+                        className="h-8 w-8 text-green-600 hover:text-green-700"
+                        disabled={salvando}
+                        onClick={() => salvarEdicao(slot.id)}
                       >
-                        <Trash2 className="h-4 w-4" />
+                        {salvando ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
                       </Button>
-                    </div>
-                  ))}
-
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="gap-2"
-                    onClick={() => adicionarSlotNovo(dia.id)}
-                  >
-                    <Plus className="h-4 w-4" />
-                    Adicionar Horário
-                  </Button>
-                </CardContent>
-              )}
-            </Card>
-          )
-        })}
-      </div>
-
-      {/* Resumo */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Resumo da Disponibilidade</CardTitle>
-          <CardDescription>
-            Dias ativos em {meses[mesAtual]}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {diasSemana.filter(d => agenda[d.id].ativo).map(dia => {
-              const total = agenda[dia.id].slotsSalvos.length + agenda[dia.id].slotsNovos.length
-              return (
-                <div key={dia.id} className="rounded-lg border border-border p-3">
-                  <p className="font-medium text-foreground">{dia.abrev}</p>
-                  <p className="text-sm text-muted-foreground">{total} horário(s) configurado(s)</p>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-8 w-8 text-muted-foreground"
+                        onClick={cancelarEdicao}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <Clock className="h-4 w-4 text-muted-foreground" />
+                      <span className="flex-1 text-sm font-medium text-foreground">
+                        {slot.horario_inicio.slice(0, 5)}
+                      </span>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                        onClick={() => iniciarEdicao(slot)}
+                      >
+                        <Pencil className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-8 w-8 text-destructive hover:text-destructive"
+                        disabled={salvando}
+                        onClick={() => deletarSlot(slot.id)}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </>
+                  )}
                 </div>
-              )
-            })}
-            {diasSemana.every(d => !agenda[d.id].ativo) && (
-              <p className="text-sm text-muted-foreground">Nenhum dia ativo ainda.</p>
+              ))}
+            </div>
+
+            {/* Novos horários */}
+            {slotsNovos.length > 0 && (
+              <div className="space-y-2">
+                <p className="text-sm font-medium text-foreground">Novos horários</p>
+                {slotsNovos.map(slot => (
+                  <div key={slot.tempId} className="flex items-center gap-2 rounded-lg border border-primary/30 bg-primary/5 p-2">
+                    <Select
+                      value={slot.horario}
+                      onValueChange={(v) => atualizarSlotNovo(slot.tempId, v)}
+                    >
+                      <SelectTrigger className="w-28">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {horariosDisponiveis.map(h => (
+                          <SelectItem key={h} value={h}>{h}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Badge variant="outline" className="text-xs text-primary">Novo</Badge>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-8 w-8 text-destructive hover:text-destructive ml-auto"
+                      onClick={() => removerSlotNovo(slot.tempId)}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
             )}
+
+            {/* Ações */}
+            <div className="flex gap-2 pt-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-2"
+                onClick={adicionarSlotNovo}
+              >
+                <Plus className="h-4 w-4" />
+                Adicionar horário
+              </Button>
+
+              {slotsNovos.length > 0 && (
+                <Button
+                  size="sm"
+                  className="gap-2 ml-auto"
+                  disabled={salvando}
+                  onClick={salvarNovos}
+                >
+                  {salvando
+                    ? <Loader2 className="h-4 w-4 animate-spin" />
+                    : <Check className="h-4 w-4" />
+                  }
+                  Salvar
+                </Button>
+              )}
+            </div>
           </div>
-        </CardContent>
-      </Card>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

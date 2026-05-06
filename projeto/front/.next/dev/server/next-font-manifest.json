@@ -1,6 +1,6 @@
 {
   "app": {
-    "[project]/projeto/front/app/cadastro/page": [
+    "[project]/projeto/front/app/login/page": [
       "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
       "static/media/5c285b27cdda1fe8-s.p.a62025f2.woff2"
     ],
@@ -13,14 +13,6 @@
       "static/media/5c285b27cdda1fe8-s.p.a62025f2.woff2"
     ],
     "[project]/projeto/front/app/profissional/page": [
-      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
-      "static/media/5c285b27cdda1fe8-s.p.a62025f2.woff2"
-    ],
-    "[project]/projeto/front/app/profissional/perfil/page": [
-      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
-      "static/media/5c285b27cdda1fe8-s.p.a62025f2.woff2"
-    ],
-    "[project]/projeto/front/app/profissional/solicitacoes/page": [
       "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
       "static/media/5c285b27cdda1fe8-s.p.a62025f2.woff2"
     ]

@@ -14,11 +14,18 @@ const criarAgendaValidators = [
         .matches(/^([0-1]\d|2[0-3]):[0-5]\d$/).withMessage('Horário inválido. Use o formato HH:MM.'),
 ];
 
+const editarAgendaValidators = [
+    body('horario_inicio')
+        .notEmpty().withMessage('Horário é obrigatório.')
+        .matches(/^([0-1]\d|2[0-3]):[0-5]\d$/).withMessage('Horário inválido. Use o formato HH:MM.'),
+];
+
 router.use(authenticate);
 router.use(authorize('PROFISSIONAL'));
 
 router.post('/', criarAgendaValidators, agendaController.criar);
 router.get('/minha', agendaController.listarMinha);
+router.put('/:id', editarAgendaValidators, agendaController.editar);
 router.delete('/:id', agendaController.deletar);
 
 export default router;

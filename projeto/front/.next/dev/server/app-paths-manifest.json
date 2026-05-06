@@ -1,8 +1,6 @@
 {
-  "/cadastro/page": "app/cadastro/page.js",
+  "/login/page": "app/login/page.js",
   "/page": "app/page.js",
   "/profissional/horarios/page": "app/profissional/horarios/page.js",
-  "/profissional/page": "app/profissional/page.js",
-  "/profissional/perfil/page": "app/profissional/perfil/page.js",
-  "/profissional/solicitacoes/page": "app/profissional/solicitacoes/page.js"
+  "/profissional/page": "app/profissional/page.js"
 }

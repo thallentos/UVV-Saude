@@ -25,6 +25,15 @@ const agendaRepository = {
         return db<Agenda>('agendas').where({ id }).first();
     },
 
+    async update(id: number, horario_inicio: string): Promise<Agenda> {
+        const [agenda] = await db<Agenda>('agendas')
+            .where({ id })
+            .update({ horario_inicio })
+            .returning('*');
+        if (!agenda) throw new Error('Erro ao atualizar slot.');
+        return agenda;
+    },
+
     async delete(id: number): Promise<void> {
         await db<Agenda>('agendas').where({ id }).delete();
     },

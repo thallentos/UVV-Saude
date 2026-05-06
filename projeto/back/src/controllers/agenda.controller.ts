@@ -33,6 +33,28 @@ const agendaController = {
         }
     },
 
+    async editar(req: Request, res: Response, next: NextFunction) {
+        try {
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                return res.status(422).json({ errors: errors.array() });
+            }
+
+            const profissional_id = req.user!.id;
+            const id = Number(req.params['id']);
+            const { horario_inicio } = req.body as { horario_inicio: string };
+
+            if (isNaN(id)) {
+                return res.status(400).json({ message: 'ID inválido.' });
+            }
+
+            const agenda = await agendaService.editar(id, profissional_id, horario_inicio);
+            return res.status(200).json(agenda);
+        } catch (error) {
+            next(error);
+        }
+    },
+
     async deletar(req: Request, res: Response, next: NextFunction) {
         try {
             const profissional_id = req.user!.id;
