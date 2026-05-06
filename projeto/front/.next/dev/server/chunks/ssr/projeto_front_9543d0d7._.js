@@ -496,14 +496,20 @@ function CadastroPage() {
     const router = (0, __TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$node_modules$2f$next$2f$navigation$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useRouter"])();
     const [step, setStep] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(1);
     const [userType, setUserType] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(null);
+    const [loading, setLoading] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(false);
+    const [error, setError] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])("");
     const [formData, setFormData] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])({
         nome: "",
         email: "",
         senha: "",
         confirmarSenha: "",
-        idade: "",
+        cpf: "",
+        telefone: "",
+        matricula: "",
         sexo: "",
-        especialidade: ""
+        especialidade_id: "",
+        registro_prof: "",
+        bio: ""
     });
     const handleInputChange = (field, value)=>{
         setFormData((prev)=>({
@@ -511,13 +517,61 @@ function CadastroPage() {
                 [field]: value
             }));
     };
-    const handleSubmit = (e)=>{
+    const handleSubmit = async (e)=>{
         e.preventDefault();
-        // Simular cadastro
-        if (userType === "paciente") {
-            router.push("/cliente");
-        } else {
-            router.push("/profissional");
+        setError("");
+        if (!userType) {
+            setError("Selecione o tipo de usuário.");
+            return;
+        }
+        if (formData.senha !== formData.confirmarSenha) {
+            setError("As senhas não coincidem.");
+            return;
+        }
+        try {
+            setLoading(true);
+            const payload = userType === "paciente" ? {
+                nome: formData.nome,
+                email: formData.email,
+                senha: formData.senha,
+                cpf: formData.cpf,
+                tipo_usuario: "PACIENTE",
+                telefone: formData.telefone,
+                matricula: formData.matricula
+            } : {
+                nome: formData.nome,
+                email: formData.email,
+                senha: formData.senha,
+                cpf: formData.cpf,
+                tipo_usuario: "PROFISSIONAL",
+                telefone: formData.telefone,
+                matricula: formData.matricula,
+                especialidade_id: Number(formData.especialidade_id),
+                registro_prof: formData.registro_prof,
+                bio: formData.bio
+            };
+            const response = await fetch("http://localhost:3000/api/v1/auth/register", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(payload)
+            });
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.message || "Erro ao criar conta.");
+            }
+            localStorage.setItem("token", data.token);
+            localStorage.setItem("usuario", JSON.stringify(data.usuario));
+            if (data.usuario.tipo_usuario === "PACIENTE") {
+                router.push("/cliente");
+            } else {
+                router.push("/profissional");
+            }
+        } catch (err) {
+            setError(err.message || "Erro inesperado ao criar conta.");
+        } finally{
+            setLoading(false);
         }
     };
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -538,12 +592,12 @@ function CadastroPage() {
                                         className: "h-5 w-5 text-primary-foreground"
                                     }, void 0, false, {
                                         fileName: "[project]/projeto/front/app/cadastro/page.tsx",
-                                        lineNumber: 51,
+                                        lineNumber: 117,
                                         columnNumber: 15
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/projeto/front/app/cadastro/page.tsx",
-                                    lineNumber: 50,
+                                    lineNumber: 116,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -551,13 +605,13 @@ function CadastroPage() {
                                     children: "UVV Health"
                                 }, void 0, false, {
                                     fileName: "[project]/projeto/front/app/cadastro/page.tsx",
-                                    lineNumber: 53,
+                                    lineNumber: 119,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/projeto/front/app/cadastro/page.tsx",
-                            lineNumber: 49,
+                            lineNumber: 115,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"], {
@@ -566,18 +620,18 @@ function CadastroPage() {
                             children: "Já tem conta? Entrar"
                         }, void 0, false, {
                             fileName: "[project]/projeto/front/app/cadastro/page.tsx",
-                            lineNumber: 55,
+                            lineNumber: 121,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/projeto/front/app/cadastro/page.tsx",
-                    lineNumber: 48,
+                    lineNumber: 114,
                     columnNumber: 9
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/projeto/front/app/cadastro/page.tsx",
-                lineNumber: 47,
+                lineNumber: 113,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("main", {
@@ -593,14 +647,14 @@ function CadastroPage() {
                                     children: "Criar Conta"
                                 }, void 0, false, {
                                     fileName: "[project]/projeto/front/app/cadastro/page.tsx",
-                                    lineNumber: 65,
+                                    lineNumber: 130,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["CardDescription"], {
                                     children: step === 1 ? "Escolha o tipo de conta" : "Preencha seus dados"
                                 }, void 0, false, {
                                     fileName: "[project]/projeto/front/app/cadastro/page.tsx",
-                                    lineNumber: 66,
+                                    lineNumber: 131,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -610,26 +664,26 @@ function CadastroPage() {
                                             className: `h-2 w-16 rounded-full ${step >= 1 ? "bg-primary" : "bg-muted"}`
                                         }, void 0, false, {
                                             fileName: "[project]/projeto/front/app/cadastro/page.tsx",
-                                            lineNumber: 71,
+                                            lineNumber: 135,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                             className: `h-2 w-16 rounded-full ${step >= 2 ? "bg-primary" : "bg-muted"}`
                                         }, void 0, false, {
                                             fileName: "[project]/projeto/front/app/cadastro/page.tsx",
-                                            lineNumber: 72,
+                                            lineNumber: 136,
                                             columnNumber: 15
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/projeto/front/app/cadastro/page.tsx",
-                                    lineNumber: 70,
+                                    lineNumber: 134,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/projeto/front/app/cadastro/page.tsx",
-                            lineNumber: 64,
+                            lineNumber: 129,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["CardContent"], {
@@ -641,7 +695,7 @@ function CadastroPage() {
                                         children: "Você é um profissional de saúde ou um paciente?"
                                     }, void 0, false, {
                                         fileName: "[project]/projeto/front/app/cadastro/page.tsx",
-                                        lineNumber: 79,
+                                        lineNumber: 143,
                                         columnNumber: 17
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -658,12 +712,12 @@ function CadastroPage() {
                                                             className: "h-7 w-7"
                                                         }, void 0, false, {
                                                             fileName: "[project]/projeto/front/app/cadastro/page.tsx",
-                                                            lineNumber: 95,
+                                                            lineNumber: 161,
                                                             columnNumber: 23
                                                         }, this)
                                                     }, void 0, false, {
                                                         fileName: "[project]/projeto/front/app/cadastro/page.tsx",
-                                                        lineNumber: 92,
+                                                        lineNumber: 154,
                                                         columnNumber: 21
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -674,7 +728,7 @@ function CadastroPage() {
                                                                 children: "Paciente"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/projeto/front/app/cadastro/page.tsx",
-                                                                lineNumber: 98,
+                                                                lineNumber: 164,
                                                                 columnNumber: 23
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -682,19 +736,19 @@ function CadastroPage() {
                                                                 children: "Agendar consultas"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/projeto/front/app/cadastro/page.tsx",
-                                                                lineNumber: 99,
+                                                                lineNumber: 165,
                                                                 columnNumber: 23
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/projeto/front/app/cadastro/page.tsx",
-                                                        lineNumber: 97,
+                                                        lineNumber: 163,
                                                         columnNumber: 21
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/projeto/front/app/cadastro/page.tsx",
-                                                lineNumber: 83,
+                                                lineNumber: 147,
                                                 columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -708,12 +762,12 @@ function CadastroPage() {
                                                             className: "h-7 w-7"
                                                         }, void 0, false, {
                                                             fileName: "[project]/projeto/front/app/cadastro/page.tsx",
-                                                            lineNumber: 115,
+                                                            lineNumber: 183,
                                                             columnNumber: 23
                                                         }, this)
                                                     }, void 0, false, {
                                                         fileName: "[project]/projeto/front/app/cadastro/page.tsx",
-                                                        lineNumber: 112,
+                                                        lineNumber: 176,
                                                         columnNumber: 21
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -724,7 +778,7 @@ function CadastroPage() {
                                                                 children: "Profissional"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/projeto/front/app/cadastro/page.tsx",
-                                                                lineNumber: 118,
+                                                                lineNumber: 186,
                                                                 columnNumber: 23
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -732,25 +786,25 @@ function CadastroPage() {
                                                                 children: "Gerenciar atendimentos"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/projeto/front/app/cadastro/page.tsx",
-                                                                lineNumber: 119,
+                                                                lineNumber: 187,
                                                                 columnNumber: 23
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/projeto/front/app/cadastro/page.tsx",
-                                                        lineNumber: 117,
+                                                        lineNumber: 185,
                                                         columnNumber: 21
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/projeto/front/app/cadastro/page.tsx",
-                                                lineNumber: 103,
+                                                lineNumber: 169,
                                                 columnNumber: 19
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/projeto/front/app/cadastro/page.tsx",
-                                        lineNumber: 82,
+                                        lineNumber: 146,
                                         columnNumber: 17
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Button"], {
@@ -763,19 +817,19 @@ function CadastroPage() {
                                                 className: "ml-2 h-4 w-4"
                                             }, void 0, false, {
                                                 fileName: "[project]/projeto/front/app/cadastro/page.tsx",
-                                                lineNumber: 130,
+                                                lineNumber: 194,
                                                 columnNumber: 19
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/projeto/front/app/cadastro/page.tsx",
-                                        lineNumber: 124,
+                                        lineNumber: 192,
                                         columnNumber: 17
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/projeto/front/app/cadastro/page.tsx",
-                                lineNumber: 78,
+                                lineNumber: 142,
                                 columnNumber: 15
                             }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("form", {
                                 onSubmit: handleSubmit,
@@ -789,7 +843,7 @@ function CadastroPage() {
                                                 children: "Nome completo"
                                             }, void 0, false, {
                                                 fileName: "[project]/projeto/front/app/cadastro/page.tsx",
-                                                lineNumber: 136,
+                                                lineNumber: 200,
                                                 columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$components$2f$ui$2f$input$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Input"], {
@@ -800,13 +854,13 @@ function CadastroPage() {
                                                 required: true
                                             }, void 0, false, {
                                                 fileName: "[project]/projeto/front/app/cadastro/page.tsx",
-                                                lineNumber: 137,
+                                                lineNumber: 201,
                                                 columnNumber: 19
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/projeto/front/app/cadastro/page.tsx",
-                                        lineNumber: 135,
+                                        lineNumber: 199,
                                         columnNumber: 17
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -817,7 +871,7 @@ function CadastroPage() {
                                                 children: "E-mail"
                                             }, void 0, false, {
                                                 fileName: "[project]/projeto/front/app/cadastro/page.tsx",
-                                                lineNumber: 147,
+                                                lineNumber: 211,
                                                 columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$components$2f$ui$2f$input$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Input"], {
@@ -829,13 +883,41 @@ function CadastroPage() {
                                                 required: true
                                             }, void 0, false, {
                                                 fileName: "[project]/projeto/front/app/cadastro/page.tsx",
-                                                lineNumber: 148,
+                                                lineNumber: 212,
                                                 columnNumber: 19
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/projeto/front/app/cadastro/page.tsx",
-                                        lineNumber: 146,
+                                        lineNumber: 210,
+                                        columnNumber: 17
+                                    }, this),
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                        className: "space-y-2",
+                                        children: [
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$components$2f$ui$2f$label$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Label"], {
+                                                htmlFor: "cpf",
+                                                children: "CPF"
+                                            }, void 0, false, {
+                                                fileName: "[project]/projeto/front/app/cadastro/page.tsx",
+                                                lineNumber: 223,
+                                                columnNumber: 19
+                                            }, this),
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$components$2f$ui$2f$input$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Input"], {
+                                                id: "cpf",
+                                                placeholder: "12345678901",
+                                                value: formData.cpf,
+                                                onChange: (e)=>handleInputChange("cpf", e.target.value),
+                                                required: true
+                                            }, void 0, false, {
+                                                fileName: "[project]/projeto/front/app/cadastro/page.tsx",
+                                                lineNumber: 224,
+                                                columnNumber: 19
+                                            }, this)
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "[project]/projeto/front/app/cadastro/page.tsx",
+                                        lineNumber: 222,
                                         columnNumber: 17
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -845,175 +927,189 @@ function CadastroPage() {
                                                 className: "space-y-2",
                                                 children: [
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$components$2f$ui$2f$label$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Label"], {
-                                                        htmlFor: "idade",
-                                                        children: "Idade"
+                                                        htmlFor: "telefone",
+                                                        children: "Telefone"
                                                     }, void 0, false, {
                                                         fileName: "[project]/projeto/front/app/cadastro/page.tsx",
-                                                        lineNumber: 160,
+                                                        lineNumber: 235,
                                                         columnNumber: 21
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$components$2f$ui$2f$input$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Input"], {
-                                                        id: "idade",
-                                                        type: "number",
-                                                        placeholder: "25",
-                                                        value: formData.idade,
-                                                        onChange: (e)=>handleInputChange("idade", e.target.value),
+                                                        id: "telefone",
+                                                        placeholder: "27999990000",
+                                                        value: formData.telefone,
+                                                        onChange: (e)=>handleInputChange("telefone", e.target.value),
                                                         required: true
                                                     }, void 0, false, {
                                                         fileName: "[project]/projeto/front/app/cadastro/page.tsx",
-                                                        lineNumber: 161,
+                                                        lineNumber: 236,
                                                         columnNumber: 21
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/projeto/front/app/cadastro/page.tsx",
-                                                lineNumber: 159,
+                                                lineNumber: 234,
                                                 columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                                 className: "space-y-2",
                                                 children: [
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$components$2f$ui$2f$label$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Label"], {
-                                                        htmlFor: "sexo",
-                                                        children: "Sexo"
+                                                        htmlFor: "matricula",
+                                                        children: "Matrícula"
                                                     }, void 0, false, {
                                                         fileName: "[project]/projeto/front/app/cadastro/page.tsx",
-                                                        lineNumber: 171,
+                                                        lineNumber: 246,
                                                         columnNumber: 21
                                                     }, this),
-                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Select"], {
-                                                        value: formData.sexo,
-                                                        onValueChange: (v)=>handleInputChange("sexo", v),
-                                                        children: [
-                                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["SelectTrigger"], {
-                                                                id: "sexo",
-                                                                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["SelectValue"], {
-                                                                    placeholder: "Selecione"
-                                                                }, void 0, false, {
-                                                                    fileName: "[project]/projeto/front/app/cadastro/page.tsx",
-                                                                    lineNumber: 174,
-                                                                    columnNumber: 25
-                                                                }, this)
-                                                            }, void 0, false, {
-                                                                fileName: "[project]/projeto/front/app/cadastro/page.tsx",
-                                                                lineNumber: 173,
-                                                                columnNumber: 23
-                                                            }, this),
-                                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["SelectContent"], {
-                                                                children: [
-                                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["SelectItem"], {
-                                                                        value: "masculino",
-                                                                        children: "Masculino"
-                                                                    }, void 0, false, {
-                                                                        fileName: "[project]/projeto/front/app/cadastro/page.tsx",
-                                                                        lineNumber: 177,
-                                                                        columnNumber: 25
-                                                                    }, this),
-                                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["SelectItem"], {
-                                                                        value: "feminino",
-                                                                        children: "Feminino"
-                                                                    }, void 0, false, {
-                                                                        fileName: "[project]/projeto/front/app/cadastro/page.tsx",
-                                                                        lineNumber: 178,
-                                                                        columnNumber: 25
-                                                                    }, this),
-                                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["SelectItem"], {
-                                                                        value: "outro",
-                                                                        children: "Outro"
-                                                                    }, void 0, false, {
-                                                                        fileName: "[project]/projeto/front/app/cadastro/page.tsx",
-                                                                        lineNumber: 179,
-                                                                        columnNumber: 25
-                                                                    }, this)
-                                                                ]
-                                                            }, void 0, true, {
-                                                                fileName: "[project]/projeto/front/app/cadastro/page.tsx",
-                                                                lineNumber: 176,
-                                                                columnNumber: 23
-                                                            }, this)
-                                                        ]
-                                                    }, void 0, true, {
+                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$components$2f$ui$2f$input$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Input"], {
+                                                        id: "matricula",
+                                                        placeholder: userType === "paciente" ? "M01" : "P01",
+                                                        value: formData.matricula,
+                                                        onChange: (e)=>handleInputChange("matricula", e.target.value),
+                                                        required: true
+                                                    }, void 0, false, {
                                                         fileName: "[project]/projeto/front/app/cadastro/page.tsx",
-                                                        lineNumber: 172,
+                                                        lineNumber: 247,
                                                         columnNumber: 21
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/projeto/front/app/cadastro/page.tsx",
-                                                lineNumber: 170,
+                                                lineNumber: 245,
                                                 columnNumber: 19
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/projeto/front/app/cadastro/page.tsx",
-                                        lineNumber: 158,
+                                        lineNumber: 233,
                                         columnNumber: 17
                                     }, this),
-                                    userType === "profissional" && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                        className: "space-y-2",
+                                    userType === "profissional" && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Fragment"], {
                                         children: [
-                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$components$2f$ui$2f$label$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Label"], {
-                                                htmlFor: "especialidade",
-                                                children: "Especialidade"
-                                            }, void 0, false, {
-                                                fileName: "[project]/projeto/front/app/cadastro/page.tsx",
-                                                lineNumber: 187,
-                                                columnNumber: 21
-                                            }, this),
-                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Select"], {
-                                                value: formData.especialidade,
-                                                onValueChange: (v)=>handleInputChange("especialidade", v),
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                className: "space-y-2",
                                                 children: [
-                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["SelectTrigger"], {
-                                                        id: "especialidade",
-                                                        children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["SelectValue"], {
-                                                            placeholder: "Selecione sua especialidade"
-                                                        }, void 0, false, {
-                                                            fileName: "[project]/projeto/front/app/cadastro/page.tsx",
-                                                            lineNumber: 190,
-                                                            columnNumber: 25
-                                                        }, this)
+                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$components$2f$ui$2f$label$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Label"], {
+                                                        htmlFor: "especialidade_id",
+                                                        children: "Especialidade"
                                                     }, void 0, false, {
                                                         fileName: "[project]/projeto/front/app/cadastro/page.tsx",
-                                                        lineNumber: 189,
+                                                        lineNumber: 260,
                                                         columnNumber: 23
                                                     }, this),
-                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["SelectContent"], {
+                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Select"], {
+                                                        value: formData.especialidade_id,
+                                                        onValueChange: (v)=>handleInputChange("especialidade_id", v),
                                                         children: [
-                                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["SelectItem"], {
-                                                                value: "nutricionista",
-                                                                children: "Nutricionista"
+                                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["SelectTrigger"], {
+                                                                id: "especialidade_id",
+                                                                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["SelectValue"], {
+                                                                    placeholder: "Selecione sua especialidade"
+                                                                }, void 0, false, {
+                                                                    fileName: "[project]/projeto/front/app/cadastro/page.tsx",
+                                                                    lineNumber: 266,
+                                                                    columnNumber: 27
+                                                                }, this)
                                                             }, void 0, false, {
                                                                 fileName: "[project]/projeto/front/app/cadastro/page.tsx",
-                                                                lineNumber: 193,
+                                                                lineNumber: 265,
                                                                 columnNumber: 25
                                                             }, this),
-                                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["SelectItem"], {
-                                                                value: "psicologo",
-                                                                children: "Psicólogo(a)"
-                                                            }, void 0, false, {
+                                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["SelectContent"], {
+                                                                children: [
+                                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["SelectItem"], {
+                                                                        value: "1",
+                                                                        children: "Psicólogo(a)"
+                                                                    }, void 0, false, {
+                                                                        fileName: "[project]/projeto/front/app/cadastro/page.tsx",
+                                                                        lineNumber: 269,
+                                                                        columnNumber: 27
+                                                                    }, this),
+                                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["SelectItem"], {
+                                                                        value: "2",
+                                                                        children: "Nutricionista"
+                                                                    }, void 0, false, {
+                                                                        fileName: "[project]/projeto/front/app/cadastro/page.tsx",
+                                                                        lineNumber: 270,
+                                                                        columnNumber: 27
+                                                                    }, this)
+                                                                ]
+                                                            }, void 0, true, {
                                                                 fileName: "[project]/projeto/front/app/cadastro/page.tsx",
-                                                                lineNumber: 194,
+                                                                lineNumber: 268,
                                                                 columnNumber: 25
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/projeto/front/app/cadastro/page.tsx",
-                                                        lineNumber: 192,
+                                                        lineNumber: 261,
                                                         columnNumber: 23
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/projeto/front/app/cadastro/page.tsx",
-                                                lineNumber: 188,
+                                                lineNumber: 259,
+                                                columnNumber: 21
+                                            }, this),
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                className: "space-y-2",
+                                                children: [
+                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$components$2f$ui$2f$label$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Label"], {
+                                                        htmlFor: "registro_prof",
+                                                        children: "Registro profissional"
+                                                    }, void 0, false, {
+                                                        fileName: "[project]/projeto/front/app/cadastro/page.tsx",
+                                                        lineNumber: 276,
+                                                        columnNumber: 23
+                                                    }, this),
+                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$components$2f$ui$2f$input$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Input"], {
+                                                        id: "registro_prof",
+                                                        placeholder: "CRP-01",
+                                                        value: formData.registro_prof,
+                                                        onChange: (e)=>handleInputChange("registro_prof", e.target.value),
+                                                        required: true
+                                                    }, void 0, false, {
+                                                        fileName: "[project]/projeto/front/app/cadastro/page.tsx",
+                                                        lineNumber: 277,
+                                                        columnNumber: 23
+                                                    }, this)
+                                                ]
+                                            }, void 0, true, {
+                                                fileName: "[project]/projeto/front/app/cadastro/page.tsx",
+                                                lineNumber: 275,
+                                                columnNumber: 21
+                                            }, this),
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                className: "space-y-2",
+                                                children: [
+                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$components$2f$ui$2f$label$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Label"], {
+                                                        htmlFor: "bio",
+                                                        children: "Bio"
+                                                    }, void 0, false, {
+                                                        fileName: "[project]/projeto/front/app/cadastro/page.tsx",
+                                                        lineNumber: 287,
+                                                        columnNumber: 23
+                                                    }, this),
+                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$components$2f$ui$2f$input$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Input"], {
+                                                        id: "bio",
+                                                        placeholder: "Psicólogo",
+                                                        value: formData.bio,
+                                                        onChange: (e)=>handleInputChange("bio", e.target.value),
+                                                        required: true
+                                                    }, void 0, false, {
+                                                        fileName: "[project]/projeto/front/app/cadastro/page.tsx",
+                                                        lineNumber: 288,
+                                                        columnNumber: 23
+                                                    }, this)
+                                                ]
+                                            }, void 0, true, {
+                                                fileName: "[project]/projeto/front/app/cadastro/page.tsx",
+                                                lineNumber: 286,
                                                 columnNumber: 21
                                             }, this)
                                         ]
-                                    }, void 0, true, {
-                                        fileName: "[project]/projeto/front/app/cadastro/page.tsx",
-                                        lineNumber: 186,
-                                        columnNumber: 19
-                                    }, this),
+                                    }, void 0, true),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                         className: "space-y-2",
                                         children: [
@@ -1022,25 +1118,25 @@ function CadastroPage() {
                                                 children: "Senha"
                                             }, void 0, false, {
                                                 fileName: "[project]/projeto/front/app/cadastro/page.tsx",
-                                                lineNumber: 201,
+                                                lineNumber: 300,
                                                 columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$components$2f$ui$2f$input$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Input"], {
                                                 id: "senha",
                                                 type: "password",
-                                                placeholder: "Mínimo 8 caracteres",
+                                                placeholder: "Mínimo 6 caracteres",
                                                 value: formData.senha,
                                                 onChange: (e)=>handleInputChange("senha", e.target.value),
                                                 required: true
                                             }, void 0, false, {
                                                 fileName: "[project]/projeto/front/app/cadastro/page.tsx",
-                                                lineNumber: 202,
+                                                lineNumber: 301,
                                                 columnNumber: 19
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/projeto/front/app/cadastro/page.tsx",
-                                        lineNumber: 200,
+                                        lineNumber: 299,
                                         columnNumber: 17
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1048,10 +1144,10 @@ function CadastroPage() {
                                         children: [
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$components$2f$ui$2f$label$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Label"], {
                                                 htmlFor: "confirmarSenha",
-                                                children: "Confirmar Senha"
+                                                children: "Confirmar senha"
                                             }, void 0, false, {
                                                 fileName: "[project]/projeto/front/app/cadastro/page.tsx",
-                                                lineNumber: 213,
+                                                lineNumber: 312,
                                                 columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$components$2f$ui$2f$input$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Input"], {
@@ -1063,14 +1159,22 @@ function CadastroPage() {
                                                 required: true
                                             }, void 0, false, {
                                                 fileName: "[project]/projeto/front/app/cadastro/page.tsx",
-                                                lineNumber: 214,
+                                                lineNumber: 313,
                                                 columnNumber: 19
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/projeto/front/app/cadastro/page.tsx",
-                                        lineNumber: 212,
+                                        lineNumber: 311,
                                         columnNumber: 17
+                                    }, this),
+                                    error && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                        className: "text-sm text-red-500",
+                                        children: error
+                                    }, void 0, false, {
+                                        fileName: "[project]/projeto/front/app/cadastro/page.tsx",
+                                        lineNumber: 323,
+                                        columnNumber: 27
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                         className: "flex gap-3 pt-2",
@@ -1084,57 +1188,58 @@ function CadastroPage() {
                                                         className: "mr-2 h-4 w-4"
                                                     }, void 0, false, {
                                                         fileName: "[project]/projeto/front/app/cadastro/page.tsx",
-                                                        lineNumber: 226,
+                                                        lineNumber: 327,
                                                         columnNumber: 21
                                                     }, this),
                                                     "Voltar"
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/projeto/front/app/cadastro/page.tsx",
-                                                lineNumber: 225,
+                                                lineNumber: 326,
                                                 columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$projeto$2f$front$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Button"], {
                                                 type: "submit",
                                                 className: "flex-1",
-                                                children: "Criar Conta"
+                                                disabled: loading,
+                                                children: loading ? "Criando conta..." : "Criar Conta"
                                             }, void 0, false, {
                                                 fileName: "[project]/projeto/front/app/cadastro/page.tsx",
-                                                lineNumber: 229,
+                                                lineNumber: 331,
                                                 columnNumber: 19
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/projeto/front/app/cadastro/page.tsx",
-                                        lineNumber: 224,
+                                        lineNumber: 325,
                                         columnNumber: 17
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/projeto/front/app/cadastro/page.tsx",
-                                lineNumber: 134,
+                                lineNumber: 198,
                                 columnNumber: 15
                             }, this)
                         }, void 0, false, {
                             fileName: "[project]/projeto/front/app/cadastro/page.tsx",
-                            lineNumber: 76,
+                            lineNumber: 140,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/projeto/front/app/cadastro/page.tsx",
-                    lineNumber: 63,
+                    lineNumber: 128,
                     columnNumber: 9
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/projeto/front/app/cadastro/page.tsx",
-                lineNumber: 62,
+                lineNumber: 127,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/projeto/front/app/cadastro/page.tsx",
-        lineNumber: 45,
+        lineNumber: 112,
         columnNumber: 5
     }, this);
 }

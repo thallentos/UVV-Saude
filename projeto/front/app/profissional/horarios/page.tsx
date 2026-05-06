@@ -1,7 +1,7 @@
 "use client"
 
-import { useState } from "react"
-import { ChevronLeft, ChevronRight, Clock, Save, Plus, Trash2 } from "lucide-react"
+import { useState, useEffect, useCallback } from "react"
+import { ChevronLeft, ChevronRight, Clock, Save, Plus, Trash2, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -14,6 +14,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+
+const API_URL = "http://localhost:3000"
 
 const diasSemana = [
   { id: 0, nome: "Domingo", abrev: "Dom" },
@@ -37,102 +39,273 @@ const meses = [
   "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
 ]
 
-type HorarioDia = {
-  ativo: boolean
-  periodos: { inicio: string; fim: string }[]
+// Slot já salvo no banco
+interface SlotSalvo {
+  id: number
+  profissional_id: number
+  data_disponivel: string
+  horario_inicio: string
+  status_vaga: "LIVRE" | "OCUPADO"
 }
 
-type HorariosSemana = Record<number, HorarioDia>
+// Slot local ainda não salvo
+interface SlotLocal {
+  tempId: string
+  horario: string
+}
+
+// Estado por dia da semana
+interface DiaSemanaState {
+  ativo: boolean
+  slotsSalvos: SlotSalvo[]
+  slotsNovos: SlotLocal[]
+  slotsParaDeletar: number[]
+}
+
+type AgendaSemana = Record<number, DiaSemanaState>
+
+function estadoInicial(): AgendaSemana {
+  const estado: AgendaSemana = {}
+  diasSemana.forEach(d => {
+    estado[d.id] = {
+      ativo: false,
+      slotsSalvos: [],
+      slotsNovos: [],
+      slotsParaDeletar: [],
+    }
+  })
+  return estado
+}
+
+// Monta data no formato YYYY-MM-DD para um dia da semana dentro do mês/ano
+function montarDatas(diaSemana: number, mes: number, ano: number): string[] {
+  const datas: string[] = []
+  const data = new Date(ano, mes, 1)
+  while (data.getMonth() === mes) {
+    if (data.getDay() === diaSemana) {
+      const yyyy = data.getFullYear()
+      const mm = String(data.getMonth() + 1).padStart(2, "0")
+      const dd = String(data.getDate()).padStart(2, "0")
+      datas.push(`${yyyy}-${mm}-${dd}`)
+    }
+    data.setDate(data.getDate() + 1)
+  }
+  return datas
+}
 
 export default function ConfigurarHorariosPage() {
-  const [mesAtual, setMesAtual] = useState(3) // Abril
-  const [anoAtual, setAnoAtual] = useState(2026)
-  const [horarios, setHorarios] = useState<HorariosSemana>({
-    0: { ativo: false, periodos: [] },
-    1: { ativo: true, periodos: [{ inicio: "08:00", fim: "12:00" }, { inicio: "14:00", fim: "18:00" }] },
-    2: { ativo: true, periodos: [{ inicio: "08:00", fim: "12:00" }, { inicio: "14:00", fim: "18:00" }] },
-    3: { ativo: true, periodos: [{ inicio: "08:00", fim: "12:00" }, { inicio: "14:00", fim: "18:00" }] },
-    4: { ativo: true, periodos: [{ inicio: "08:00", fim: "12:00" }, { inicio: "14:00", fim: "18:00" }] },
-    5: { ativo: true, periodos: [{ inicio: "08:00", fim: "12:00" }] },
-    6: { ativo: false, periodos: [] },
-  })
+  const [mesAtual, setMesAtual] = useState(() => new Date().getMonth())
+  const [anoAtual, setAnoAtual] = useState(() => new Date().getFullYear())
+  const [agenda, setAgenda] = useState<AgendaSemana>(estadoInicial())
+  const [carregando, setCarregando] = useState(true)
+  const [salvando, setSalvando] = useState(false)
+  const [erro, setErro] = useState("")
+  const [sucesso, setSucesso] = useState("")
 
-  const toggleDia = (diaId: number) => {
-    setHorarios(prev => ({
+  function getToken(): string {
+    return localStorage.getItem("token") ?? ""
+  }
+
+  const carregarAgenda = useCallback(async () => {
+    setCarregando(true)
+    setErro("")
+    try {
+      const res = await fetch(`${API_URL}/api/v1/agenda/minha`, {
+        headers: { Authorization: `Bearer ${getToken()}` },
+      })
+      if (!res.ok) throw new Error("Erro ao carregar agenda.")
+      const slots: SlotSalvo[] = await res.json()
+
+      // Filtra apenas os slots do mês/ano atual
+      const novoEstado = estadoInicial()
+      slots.forEach(slot => {
+        const data = new Date(slot.data_disponivel + "T00:00:00")
+        if (data.getMonth() === mesAtual && data.getFullYear() === anoAtual) {
+          const diaSemana = data.getDay()
+          novoEstado[diaSemana].ativo = true
+          // Evita duplicar o mesmo horário
+          const jaExiste = novoEstado[diaSemana].slotsSalvos.some(
+            s => s.horario_inicio === slot.horario_inicio
+          )
+          if (!jaExiste) {
+            novoEstado[diaSemana].slotsSalvos.push(slot)
+          }
+        }
+      })
+      setAgenda(novoEstado)
+    } catch {
+      setErro("Não foi possível carregar sua agenda.")
+    } finally {
+      setCarregando(false)
+    }
+  }, [mesAtual, anoAtual])
+
+  useEffect(() => {
+    carregarAgenda()
+  }, [carregarAgenda])
+
+  function toggleDia(diaId: number) {
+    setAgenda(prev => ({
       ...prev,
       [diaId]: {
         ...prev[diaId],
         ativo: !prev[diaId].ativo,
-        periodos: !prev[diaId].ativo ? [{ inicio: "08:00", fim: "12:00" }] : prev[diaId].periodos
+        slotsNovos: !prev[diaId].ativo
+          ? [{ tempId: crypto.randomUUID(), horario: "08:00" }]
+          : prev[diaId].slotsNovos,
       }
     }))
   }
 
-  const adicionarPeriodo = (diaId: number) => {
-    setHorarios(prev => ({
+  function adicionarSlotNovo(diaId: number) {
+    setAgenda(prev => ({
       ...prev,
       [diaId]: {
         ...prev[diaId],
-        periodos: [...prev[diaId].periodos, { inicio: "14:00", fim: "18:00" }]
+        slotsNovos: [
+          ...prev[diaId].slotsNovos,
+          { tempId: crypto.randomUUID(), horario: "14:00" }
+        ]
       }
     }))
   }
 
-  const removerPeriodo = (diaId: number, periodoIndex: number) => {
-    setHorarios(prev => ({
+  function atualizarSlotNovo(diaId: number, tempId: string, horario: string) {
+    setAgenda(prev => ({
       ...prev,
       [diaId]: {
         ...prev[diaId],
-        periodos: prev[diaId].periodos.filter((_, i) => i !== periodoIndex)
-      }
-    }))
-  }
-
-  const atualizarPeriodo = (diaId: number, periodoIndex: number, campo: "inicio" | "fim", valor: string) => {
-    setHorarios(prev => ({
-      ...prev,
-      [diaId]: {
-        ...prev[diaId],
-        periodos: prev[diaId].periodos.map((p, i) => 
-          i === periodoIndex ? { ...p, [campo]: valor } : p
+        slotsNovos: prev[diaId].slotsNovos.map(s =>
+          s.tempId === tempId ? { ...s, horario } : s
         )
       }
     }))
   }
 
-  const mesAnterior = () => {
-    if (mesAtual === 0) {
-      setMesAtual(11)
-      setAnoAtual(prev => prev - 1)
-    } else {
-      setMesAtual(prev => prev - 1)
+  function removerSlotNovo(diaId: number, tempId: string) {
+    setAgenda(prev => ({
+      ...prev,
+      [diaId]: {
+        ...prev[diaId],
+        slotsNovos: prev[diaId].slotsNovos.filter(s => s.tempId !== tempId)
+      }
+    }))
+  }
+
+  function marcarParaDeletar(diaId: number, slotId: number) {
+    setAgenda(prev => ({
+      ...prev,
+      [diaId]: {
+        ...prev[diaId],
+        slotsSalvos: prev[diaId].slotsSalvos.filter(s => s.id !== slotId),
+        slotsParaDeletar: [...prev[diaId].slotsParaDeletar, slotId],
+      }
+    }))
+  }
+
+  async function salvar() {
+    setSalvando(true)
+    setErro("")
+    setSucesso("")
+    const token = getToken()
+
+    try {
+      // 1. Deletar slots marcados
+      const deletPromises: Promise<Response>[] = []
+      diasSemana.forEach(dia => {
+        agenda[dia.id].slotsParaDeletar.forEach(id => {
+          deletPromises.push(
+            fetch(`${API_URL}/api/v1/agenda/${id}`, {
+              method: "DELETE",
+              headers: { Authorization: `Bearer ${token}` },
+            })
+          )
+        })
+      })
+      await Promise.all(deletPromises)
+
+      // 2. Criar novos slots para todas as datas do mês
+      const criarPromises: Promise<Response>[] = []
+      diasSemana.forEach(dia => {
+        if (!agenda[dia.id].ativo) return
+        const datas = montarDatas(dia.id, mesAtual, anoAtual)
+        agenda[dia.id].slotsNovos.forEach(slot => {
+          datas.forEach(data => {
+            criarPromises.push(
+              fetch(`${API_URL}/api/v1/agenda`, {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                  data_disponivel: data,
+                  horario_inicio: slot.horario,
+                }),
+              })
+            )
+          })
+        })
+      })
+
+      const resultados = await Promise.all(criarPromises)
+      const falhas = resultados.filter(r => !r.ok && r.status !== 409)
+      if (falhas.length > 0) {
+        setErro(`${falhas.length} slot(s) não puderam ser criados.`)
+      } else {
+        setSucesso("Agenda salva com sucesso!")
+        await carregarAgenda()
+      }
+    } catch {
+      setErro("Erro ao salvar agenda. Tente novamente.")
+    } finally {
+      setSalvando(false)
     }
   }
 
-  const proximoMes = () => {
-    if (mesAtual === 11) {
-      setMesAtual(0)
-      setAnoAtual(prev => prev + 1)
-    } else {
-      setMesAtual(prev => prev + 1)
-    }
+  function mesAnterior() {
+    if (mesAtual === 0) { setMesAtual(11); setAnoAtual(a => a - 1) }
+    else setMesAtual(m => m - 1)
+  }
+
+  function proximoMes() {
+    if (mesAtual === 11) { setMesAtual(0); setAnoAtual(a => a + 1) }
+    else setMesAtual(m => m + 1)
+  }
+
+  if (carregando) {
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    )
   }
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Configurar Horários</h1>
           <p className="text-muted-foreground">
-            Defina sua disponibilidade mensal para atendimentos
+            Defina sua disponibilidade para {meses[mesAtual]} de {anoAtual}
           </p>
         </div>
-        <Button className="gap-2">
-          <Save className="h-4 w-4" />
-          Salvar Alterações
+        <Button onClick={salvar} disabled={salvando} className="gap-2">
+          {salvando ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+          {salvando ? "Salvando..." : "Salvar Alterações"}
         </Button>
       </div>
+
+      {erro && (
+        <div className="rounded-lg border border-destructive/50 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+          {erro}
+        </div>
+      )}
+      {sucesso && (
+        <div className="rounded-lg border border-green-500/50 bg-green-500/10 px-4 py-3 text-sm text-green-700">
+          {sucesso}
+        </div>
+      )}
 
       {/* Seletor de Mês */}
       <Card>
@@ -158,88 +331,98 @@ export default function ConfigurarHorariosPage() {
 
       {/* Configuração por Dia da Semana */}
       <div className="space-y-4">
-        {diasSemana.map((dia) => (
-          <Card key={dia.id} className={!horarios[dia.id].ativo ? "opacity-60" : ""}>
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <Switch
-                    checked={horarios[dia.id].ativo}
-                    onCheckedChange={() => toggleDia(dia.id)}
-                    id={`dia-${dia.id}`}
-                  />
-                  <Label htmlFor={`dia-${dia.id}`} className="cursor-pointer">
-                    <CardTitle className="text-base">{dia.nome}</CardTitle>
-                  </Label>
+        {diasSemana.map((dia) => {
+          const estado = agenda[dia.id]
+          const totalSlots = estado.slotsSalvos.length + estado.slotsNovos.length
+          return (
+            <Card key={dia.id} className={!estado.ativo ? "opacity-60" : ""}>
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Switch
+                      checked={estado.ativo}
+                      onCheckedChange={() => toggleDia(dia.id)}
+                      id={`dia-${dia.id}`}
+                    />
+                    <Label htmlFor={`dia-${dia.id}`} className="cursor-pointer">
+                      <CardTitle className="text-base">{dia.nome}</CardTitle>
+                    </Label>
+                  </div>
+                  {estado.ativo && (
+                    <Badge variant="secondary">{totalSlots} horário(s)</Badge>
+                  )}
                 </div>
-                {horarios[dia.id].ativo && (
-                  <Badge variant="secondary">
-                    {horarios[dia.id].periodos.length} período(s)
-                  </Badge>
-                )}
-              </div>
-            </CardHeader>
+              </CardHeader>
 
-            {horarios[dia.id].ativo && (
-              <CardContent className="space-y-4 pt-0">
-                {horarios[dia.id].periodos.map((periodo, index) => (
-                  <div key={index} className="flex items-center gap-3">
-                    <Clock className="h-4 w-4 text-muted-foreground" />
-                    <div className="flex flex-1 items-center gap-2">
-                      <Select
-                        value={periodo.inicio}
-                        onValueChange={(v) => atualizarPeriodo(dia.id, index, "inicio", v)}
-                      >
-                        <SelectTrigger className="w-24">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {horariosDisponiveis.map((h) => (
-                            <SelectItem key={h} value={h}>{h}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <span className="text-muted-foreground">até</span>
-                      <Select
-                        value={periodo.fim}
-                        onValueChange={(v) => atualizarPeriodo(dia.id, index, "fim", v)}
-                      >
-                        <SelectTrigger className="w-24">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {horariosDisponiveis.map((h) => (
-                            <SelectItem key={h} value={h}>{h}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+              {estado.ativo && (
+                <CardContent className="space-y-3 pt-0">
+                  {/* Slots já salvos no banco */}
+                  {estado.slotsSalvos.map(slot => (
+                    <div key={slot.id} className="flex items-center gap-3">
+                      <Clock className="h-4 w-4 text-muted-foreground" />
+                      <span className="w-24 rounded-md border border-input bg-muted px-3 py-2 text-sm text-muted-foreground">
+                        {slot.horario_inicio.slice(0, 5)}
+                      </span>
+                      <Badge variant="secondary" className="text-xs">Salvo</Badge>
+                      {slot.status_vaga === "LIVRE" && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="text-destructive hover:text-destructive"
+                          onClick={() => marcarParaDeletar(dia.id, slot.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      )}
+                      {slot.status_vaga === "OCUPADO" && (
+                        <Badge className="bg-yellow-100 text-yellow-700 text-xs">Ocupado</Badge>
+                      )}
                     </div>
-                    {horarios[dia.id].periodos.length > 1 && (
+                  ))}
+
+                  {/* Slots novos ainda não salvos */}
+                  {estado.slotsNovos.map(slot => (
+                    <div key={slot.tempId} className="flex items-center gap-3">
+                      <Clock className="h-4 w-4 text-muted-foreground" />
+                      <Select
+                        value={slot.horario}
+                        onValueChange={(v) => atualizarSlotNovo(dia.id, slot.tempId, v)}
+                      >
+                        <SelectTrigger className="w-24">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {horariosDisponiveis.map(h => (
+                            <SelectItem key={h} value={h}>{h}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <Badge variant="outline" className="text-xs text-primary">Novo</Badge>
                       <Button
                         variant="ghost"
                         size="icon"
                         className="text-destructive hover:text-destructive"
-                        onClick={() => removerPeriodo(dia.id, index)}
+                        onClick={() => removerSlotNovo(dia.id, slot.tempId)}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
-                    )}
-                  </div>
-                ))}
-                
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="gap-2"
-                  onClick={() => adicionarPeriodo(dia.id)}
-                >
-                  <Plus className="h-4 w-4" />
-                  Adicionar Período
-                </Button>
-              </CardContent>
-            )}
-          </Card>
-        ))}
+                    </div>
+                  ))}
+
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="gap-2"
+                    onClick={() => adicionarSlotNovo(dia.id)}
+                  >
+                    <Plus className="h-4 w-4" />
+                    Adicionar Horário
+                  </Button>
+                </CardContent>
+              )}
+            </Card>
+          )
+        })}
       </div>
 
       {/* Resumo */}
@@ -247,23 +430,23 @@ export default function ConfigurarHorariosPage() {
         <CardHeader>
           <CardTitle className="text-base">Resumo da Disponibilidade</CardTitle>
           <CardDescription>
-            Visão geral dos seus horários configurados
+            Dias ativos em {meses[mesAtual]}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {diasSemana.filter(d => horarios[d.id].ativo).map((dia) => (
-              <div key={dia.id} className="rounded-lg border border-border p-3">
-                <p className="font-medium text-foreground">{dia.abrev}</p>
-                <div className="mt-1 space-y-1">
-                  {horarios[dia.id].periodos.map((p, i) => (
-                    <p key={i} className="text-sm text-muted-foreground">
-                      {p.inicio} - {p.fim}
-                    </p>
-                  ))}
+            {diasSemana.filter(d => agenda[d.id].ativo).map(dia => {
+              const total = agenda[dia.id].slotsSalvos.length + agenda[dia.id].slotsNovos.length
+              return (
+                <div key={dia.id} className="rounded-lg border border-border p-3">
+                  <p className="font-medium text-foreground">{dia.abrev}</p>
+                  <p className="text-sm text-muted-foreground">{total} horário(s) configurado(s)</p>
                 </div>
-              </div>
-            ))}
+              )
+            })}
+            {diasSemana.every(d => !agenda[d.id].ativo) && (
+              <p className="text-sm text-muted-foreground">Nenhum dia ativo ainda.</p>
+            )}
           </div>
         </CardContent>
       </Card>

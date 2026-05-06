@@ -1,68 +1,27 @@
-[00:00:02.338] Server  LOG     ✓ Ready in 1680ms
-[00:00:03.742] Server  ERROR   ⨯ ./projeto/front/app/page.tsx:15:2
-Parsing ecmascript source code failed
-  13 |               <Heart className="h-5 w-5 text-primary-foreground" />
-  14 |             </div>
-> 15 | <<<<<<< HEAD
-     |  ^^
-  16 |             <span className="text-lg font-bold text-foreground">UVV Saúde</span>
-  17 | =======
-  18 |             <span className="text-lg font-bold text-foreground">UVV Health</span>
-
-Expression expected
-
-
-
-./projeto/front/app/page.tsx:15:4
-Parsing ecmascript source code failed
-  13 |               <Heart className="h-5 w-5 text-primary-foreground" />
-  14 |             </div>
-> 15 | <<<<<<< HEAD
-     |    ^^
-  16 |             <span className="text-lg font-bold text-foreground">UVV Saúde</span>
-  17 | =======
-  18 |             <span className="text-lg font-bold text-foreground">UVV Health</span>
-
-Expression expected
-
-
-[00:00:04.518] Browser ERROR   uncaughtError: Error: ./projeto/front/app/page.tsx:15:4
-Parsing ecmascript source code failed
-  13 |               <Heart className="h-5 w-5 text-primary-foreground" />
-  14 |             </div>
-> 15 | <<<<<<< HEAD
-     |    ^^
-  16 |             <span className="text-lg font-bold text-foreground">UVV Saúde</span>
-  17 | =======
-  18 |             <span className="text-lg font-bold text-foreground">UVV Health</span>
-
-Expression expected
-
-
-[00:00:04.971] Browser ERROR   ./projeto/front/app/page.tsx:15:4
-Parsing ecmascript source code failed
-  13 |               <Heart className="h-5 w-5 text-primary-foreground" />
-  14 |             </div>
-> 15 | <<<<<<< HEAD
-     |    ^^
-  16 |             <span className="text-lg font-bold text-foreground">UVV Saúde</span>
-  17 | =======
-  18 |             <span className="text-lg font-bold text-foreground">UVV Health</span>
-
-Expression expected
-[00:00:04.971] Browser ERROR   ./projeto/front/app/page.tsx:15:4
-Parsing ecmascript source code failed
-  13 |               <Heart className="h-5 w-5 text-primary-foreground" />
-  14 |             </div>
-> 15 | <<<<<<< HEAD
-     |    ^^
-  16 |             <span className="text-lg font-bold text-foreground">UVV Saúde</span>
-  17 | =======
-  18 |             <span className="text-lg font-bold text-foreground">UVV Health</span>
-
-Expression expected
-[00:00:12.185] Server  LOG     ✓ Compiled in 214ms
-[00:00:13.848] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[00:00:14.981] Browser LOG     %c[Vercel Web Analytics]%c Debug mode is enabled by default in development. No requests will be sent to the server. color: rgb(120, 120, 120) color: inherit
-[00:00:14.982] Browser LOG     %c[Vercel Web Analytics]%c Running queued event color: rgb(120, 120, 120) color: inherit pageview {"path":"/","route":"/"}
-[00:00:14.982] Browser LOG     %c[Vercel Web Analytics]%c [view] http://localhost:3001/ color: rgb(120, 120, 120) color: inherit {"dp":"/","o":"http://localhost:3001/","sdkn":"@vercel/analytics/next","sdkv":"1.6.1","sv":"0.1.3","ts":1777419934092} /_vercel/insights/view
+[00:00:02.504] Server  LOG     ✓ Ready in 1814ms
+[00:00:09.009] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:00:09.214] Browser LOG     %c[Vercel Web Analytics]%c Debug mode is enabled by default in development. No requests will be sent to the server. color: rgb(120, 120, 120) color: inherit
+[00:00:09.214] Browser LOG     %c[Vercel Web Analytics]%c Running queued event color: rgb(120, 120, 120) color: inherit pageview {"path":"/","route":"/"}
+[00:00:09.214] Browser LOG     %c[Vercel Web Analytics]%c [view] http://localhost:3001/ color: rgb(120, 120, 120) color: inherit {"dp":"/","o":"http://localhost:3001/","r":"","sdkn":"@vercel/analytics/next","sdkv":"1.6.1","sv":"0.1.3","ts":1778026394811} /_vercel/insights/view
+[00:03:38.999] Browser LOG     %c[Vercel Web Analytics]%c [view] http://localhost:3001/cadastro color: rgb(120, 120, 120) color: inherit {"dp":"/cadastro","o":"http://localhost:3001/cadastro","sdkn":"@vercel/analytics/next","sdkv":"1.6.1","sv":"0.1.3","ts":1778026604595} /_vercel/insights/view
+[00:04:41.055] Browser LOG     %c[Vercel Web Analytics]%c [view] http://localhost:3001/profissional color: rgb(120, 120, 120) color: inherit {"dp":"/profissional","o":"http://localhost:3001/profissional","sdkn":"@vercel/analytics/next","sdkv":"1.6.1","sv":"0.1.3","ts":1778026666656} /_vercel/insights/view
+[00:04:48.399] Browser LOG     %c[Vercel Web Analytics]%c [view] http://localhost:3001/profissional/horarios color: rgb(120, 120, 120) color: inherit {"dp":"/profissional/horarios","o":"http://localhost:3001/profissional/horarios","sdkn":"@vercel/analytics/next","sdkv":"1.6.1","sv":"0.1.3","ts":1778026673940} /_vercel/insights/view
+[00:09:37.475] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:09:37.715] Browser LOG     %c[Vercel Web Analytics]%c Debug mode is enabled by default in development. No requests will be sent to the server. color: rgb(120, 120, 120) color: inherit
+[00:09:37.715] Browser LOG     %c[Vercel Web Analytics]%c Running queued event color: rgb(120, 120, 120) color: inherit pageview {"path":"/profissional/horarios","route":"/profissional/horarios"}
+[00:09:37.715] Browser LOG     %c[Vercel Web Analytics]%c [view] http://localhost:3001/profissional/horarios color: rgb(120, 120, 120) color: inherit {"dp":"/profissional/horarios","o":"http://localhost:3001/profissional/horarios","r":"","sdkn":"@vercel/analytics/next","sdkv":"1.6.1","sv":"0.1.3","ts":1778026963290} /_vercel/insights/view
+[00:10:49.205] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:10:49.377] Browser LOG     %c[Vercel Web Analytics]%c Debug mode is enabled by default in development. No requests will be sent to the server. color: rgb(120, 120, 120) color: inherit
+[00:10:49.378] Browser LOG     %c[Vercel Web Analytics]%c Running queued event color: rgb(120, 120, 120) color: inherit pageview {"path":"/profissional/horarios","route":"/profissional/horarios"}
+[00:10:49.378] Browser LOG     %c[Vercel Web Analytics]%c [view] http://localhost:3001/profissional/horarios color: rgb(120, 120, 120) color: inherit {"dp":"/profissional/horarios","o":"http://localhost:3001/profissional/horarios","r":"","sdkn":"@vercel/analytics/next","sdkv":"1.6.1","sv":"0.1.3","ts":1778027034970} /_vercel/insights/view
+[00:11:58.756] Browser LOG     %c[Vercel Web Analytics]%c [view] http://localhost:3001/profissional color: rgb(120, 120, 120) color: inherit {"dp":"/profissional","o":"http://localhost:3001/profissional","sdkn":"@vercel/analytics/next","sdkv":"1.6.1","sv":"0.1.3","ts":1778027104352} /_vercel/insights/view
+[00:12:01.873] Browser LOG     %c[Vercel Web Analytics]%c [view] http://localhost:3001/profissional/horarios color: rgb(120, 120, 120) color: inherit {"dp":"/profissional/horarios","o":"http://localhost:3001/profissional/horarios","sdkn":"@vercel/analytics/next","sdkv":"1.6.1","sv":"0.1.3","ts":1778027107458} /_vercel/insights/view
+[00:12:06.286] Browser LOG     %c[Vercel Web Analytics]%c [view] http://localhost:3001/profissional color: rgb(120, 120, 120) color: inherit {"dp":"/profissional","o":"http://localhost:3001/profissional","sdkn":"@vercel/analytics/next","sdkv":"1.6.1","sv":"0.1.3","ts":1778027111818} /_vercel/insights/view
+[00:12:08.884] Browser LOG     %c[Vercel Web Analytics]%c [view] http://localhost:3001/profissional/solicitacoes color: rgb(120, 120, 120) color: inherit {"dp":"/profissional/solicitacoes","o":"http://localhost:3001/profissional/solicitacoes","sdkn":"@vercel/analytics/next","sdkv":"1.6.1","sv":"0.1.3","ts":1778027114465} /_vercel/insights/view
+[00:12:20.110] Browser LOG     %c[Vercel Web Analytics]%c [view] http://localhost:3001/profissional/horarios color: rgb(120, 120, 120) color: inherit {"dp":"/profissional/horarios","o":"http://localhost:3001/profissional/horarios","sdkn":"@vercel/analytics/next","sdkv":"1.6.1","sv":"0.1.3","ts":1778027125694} /_vercel/insights/view
+[00:13:21.403] Browser LOG     %c[Vercel Web Analytics]%c [view] http://localhost:3001/profissional color: rgb(120, 120, 120) color: inherit {"dp":"/profissional","o":"http://localhost:3001/profissional","sdkn":"@vercel/analytics/next","sdkv":"1.6.1","sv":"0.1.3","ts":1778027187003} /_vercel/insights/view
+[00:13:24.169] Browser LOG     %c[Vercel Web Analytics]%c [view] http://localhost:3001/profissional/perfil color: rgb(120, 120, 120) color: inherit {"dp":"/profissional/perfil","o":"http://localhost:3001/profissional/perfil","sdkn":"@vercel/analytics/next","sdkv":"1.6.1","sv":"0.1.3","ts":1778027189727} /_vercel/insights/view
+[00:13:25.185] Browser LOG     %c[Vercel Web Analytics]%c [view] http://localhost:3001/profissional color: rgb(120, 120, 120) color: inherit {"dp":"/profissional","o":"http://localhost:3001/profissional","sdkn":"@vercel/analytics/next","sdkv":"1.6.1","sv":"0.1.3","ts":1778027190780} /_vercel/insights/view
+[00:14:56.751] Browser LOG     %c[Vercel Web Analytics]%c [view] http://localhost:3001/profissional/horarios color: rgb(120, 120, 120) color: inherit {"dp":"/profissional/horarios","o":"http://localhost:3001/profissional/horarios","sdkn":"@vercel/analytics/next","sdkv":"1.6.1","sv":"0.1.3","ts":1778027282335} /_vercel/insights/view
+[00:17:36.720] Browser LOG     %c[Vercel Web Analytics]%c [view] http://localhost:3001/profissional color: rgb(120, 120, 120) color: inherit {"dp":"/profissional","o":"http://localhost:3001/profissional","sdkn":"@vercel/analytics/next","sdkv":"1.6.1","sv":"0.1.3","ts":1778027442317} /_vercel/insights/view
+[00:17:38.396] Browser LOG     %c[Vercel Web Analytics]%c [view] http://localhost:3001/profissional/horarios color: rgb(120, 120, 120) color: inherit {"dp":"/profissional/horarios","o":"http://localhost:3001/profissional/horarios","sdkn":"@vercel/analytics/next","sdkv":"1.6.1","sv":"0.1.3","ts":1778027443997} /_vercel/insights/view
