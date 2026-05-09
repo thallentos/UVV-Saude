@@ -20,12 +20,17 @@ const editarAgendaValidators = [
         .matches(/^([0-1]\d|2[0-3]):[0-5]\d$/).withMessage('Horário inválido. Use o formato HH:MM.'),
 ];
 
-router.use(authenticate);
-router.use(authorize('PROFISSIONAL'));
+// Rota pública para o paciente ver a agenda de um profissional
+router.get(
+    '/profissional/:profissional_id',
+    authenticate,
+    agendaController.listarPorProfissional
+);
 
-router.post('/', criarAgendaValidators, agendaController.criar);
-router.get('/minha', agendaController.listarMinha);
-router.put('/:id', editarAgendaValidators, agendaController.editar);
-router.delete('/:id', agendaController.deletar);
+// Rotas exclusivas do profissional
+router.post('/', authenticate, authorize('PROFISSIONAL'), criarAgendaValidators, agendaController.criar);
+router.get('/minha', authenticate, authorize('PROFISSIONAL'), agendaController.listarMinha);
+router.put('/:id', authenticate, authorize('PROFISSIONAL'), editarAgendaValidators, agendaController.editar);
+router.delete('/:id', authenticate, authorize('PROFISSIONAL'), agendaController.deletar);
 
 export default router;

@@ -21,6 +21,13 @@ const agendaRepository = {
             .orderBy('horario_inicio', 'asc');
     },
 
+    async findLivreByProfissional(profissional_id: number): Promise<Agenda[]> {
+        return db<Agenda>('agendas')
+            .where({ profissional_id, status_vaga: 'LIVRE' })
+            .orderBy('data_disponivel', 'asc')
+            .orderBy('horario_inicio', 'asc');
+    },
+
     async findById(id: number): Promise<Agenda | undefined> {
         return db<Agenda>('agendas').where({ id }).first();
     },
@@ -44,11 +51,7 @@ const agendaRepository = {
         horario_inicio: string,
         excludeId?: number
     ): Promise<boolean> {
-        const query = db<Agenda>('agendas').where({
-            profissional_id,
-            data_disponivel,
-            horario_inicio,
-        });
+        const query = db<Agenda>('agendas').where({ profissional_id, data_disponivel, horario_inicio });
         if (excludeId) query.whereNot({ id: excludeId });
         const slot = await query.first();
         return !!slot;
