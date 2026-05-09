@@ -13,6 +13,7 @@ import {
 } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
+import { logout } from "@/lib/auth"
 
 const menuItems = [
   {
@@ -91,12 +92,10 @@ export function ClientSidebar() {
         <Button
           variant="ghost"
           className="mt-3 w-full justify-start gap-2 text-muted-foreground hover:text-destructive"
-          asChild
+          onClick={logout}
         >
-          <Link href="/">
-            <LogOut className="h-4 w-4" />
-            Sair
-          </Link>
+          <LogOut className="h-4 w-4" />
+          Sair
         </Button>
       </div>
     </aside>

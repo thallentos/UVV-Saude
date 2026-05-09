@@ -2052,16 +2052,6 @@
     background-color: var(--sidebar-border);
   }
 
-  .bg-success\/10 {
-    background-color: var(--success);
-  }
-
-  @supports (color: color-mix(in lab, red, red)) {
-    .bg-success\/10 {
-      background-color: color-mix(in oklab, var(--success) 10%, transparent);
-    }
-  }
-
   .bg-transparent {
     background-color: #0000;
   }
@@ -2552,10 +2542,6 @@
     .text-sidebar-foreground\/70 {
       color: color-mix(in oklab, var(--sidebar-foreground) 70%, transparent);
     }
-  }
-
-  .text-success {
-    color: var(--success);
   }
 
   .text-white {
@@ -3407,12 +3393,6 @@
   @media (hover: hover) {
     .hover\:text-primary:hover {
       color: var(--primary);
-    }
-  }
-
-  @media (hover: hover) {
-    .hover\:text-primary-foreground:hover {
-      color: var(--primary-foreground);
     }
   }
 

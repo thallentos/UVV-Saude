@@ -8,6 +8,7 @@ import {
   CalendarClock,
   ClipboardList,
   Calendar,
+  LogOut,
   User,
   Menu,
   X,
@@ -15,6 +16,7 @@ import {
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
+import { logout } from "@/lib/auth"
 
 const navItems = [
   { href: "/profissional", label: "Agenda", icon: Calendar },
@@ -85,13 +87,17 @@ export function ProfessionalSidebar() {
           })}
         </nav>
 
-        <div className="border-t border-border p-4">
-          <Link
-            href="/"
-            className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
-          >
-            Voltar ao inicio
+        <div className="border-t border-border p-4 space-y-2">
+          <Link href="/" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
+            Voltar ao início
           </Link>
+          <button
+            onClick={logout}
+            className="flex items-center gap-2 text-sm text-muted-foreground hover:text-destructive"
+          >
+            <LogOut className="h-4 w-4" />
+            Sair
+          </button>
         </div>
       </aside>
     </>
