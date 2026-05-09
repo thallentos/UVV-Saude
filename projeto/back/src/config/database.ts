@@ -1,5 +1,10 @@
 import knex from 'knex';
 import 'dotenv/config';
+import pg from 'pg';
+
+// Impede o pg de converter campos date em objetos Date do JavaScript
+// Mantém como string no formato YYYY-MM-DD
+pg.types.setTypeParser(1082, (val: string) => val);
 
 const db = knex({
   client: 'pg',

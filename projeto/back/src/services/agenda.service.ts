@@ -29,9 +29,15 @@ const agendaService = {
             const err = Object.assign(new Error('Sem permissão para editar este slot.'), { statusCode: 403 });
             throw err;
         }
+
+        // Garante formato YYYY-MM-DD independente do que o pg retornar
+        const dataFormatada = slot.data_disponivel instanceof Date
+            ? slot.data_disponivel.toISOString().split('T')[0]
+            : String(slot.data_disponivel).split('T')[0];
+
         const conflito = await agendaRepository.existeConflito(
             profissional_id,
-            slot.data_disponivel.toString(),
+            dataFormatada,
             horario_inicio,
             id
         );
