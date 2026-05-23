@@ -1,3 +1,7 @@
+"use client"
+
+import { useEffect, useState } from "react"
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -5,11 +9,15 @@ import { Badge } from "@/components/ui/badge"
 import { Calendar, Clock, MapPin, ArrowRight, CalendarPlus, CalendarCheck, User } from "lucide-react"
 import Link from "next/link"
 
+import { getToken, logout } from "@/lib/auth"
+
 // Dados do perfil do paciente
-const perfilPaciente = {
-  nome: "Maria Oliveira",
-  idade: 28,
-  sexo: "Feminino",
+interface UsuarioMe {
+  id: number
+  nome: string
+  email: string
+  telefone: string | null
+  tipo_usuario: string
 }
 
 const proximaConsulta = {
@@ -25,29 +33,77 @@ const consultasAgendadas = 2
 const consultasRealizadas = 8
 
 export default function ClienteDashboard() {
+  const [perfilPaciente, setPerfilPaciente] = useState<UsuarioMe | null>(null)
+
+  useEffect(() => {
+    async function carregarUsuario() {
+      try {
+        const token = getToken()
+
+        if (!token) {
+          logout()
+          return
+        }
+
+        const response = await fetch("http://localhost:3000/api/v1/me", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+
+        if (response.status === 401) {
+          logout()
+          return
+        }
+
+        if (!response.ok) {
+          throw new Error("Erro ao carregar usuário")
+        }
+
+        const data = await response.json()
+
+        setPerfilPaciente(data)
+      } catch (error) {
+        console.error("Erro ao buscar usuário:", error)
+      }
+    }
+
+    carregarUsuario()
+  }, [])
+
   return (
     <div className="space-y-8">
       {/* Saudação e Perfil */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-foreground">
-            Olá, {perfilPaciente.nome.split(" ")[0]}!
+            Olá, {perfilPaciente?.nome?.split(" ")[0]}!
           </h1>
+
           <p className="mt-1 text-muted-foreground">
             Bem-vinda ao seu portal de saúde.
           </p>
         </div>
+
         <Link href="/cliente/perfil">
           <Card className="flex items-center gap-3 p-3 transition-colors hover:bg-accent/50">
             <Avatar className="h-10 w-10">
               <AvatarFallback className="bg-primary/10 text-primary">
-                {perfilPaciente.nome.split(" ").map(n => n[0]).join("").slice(0, 2)}
+                {perfilPaciente?.nome
+                  ?.split(" ")
+                  .map((n) => n[0])
+                  .join("")
+                  .slice(0, 2)}
               </AvatarFallback>
             </Avatar>
+
             <div className="text-left">
-              <p className="text-sm font-medium text-foreground">{perfilPaciente.nome}</p>
+              <p className="text-sm font-medium text-foreground">
+                {perfilPaciente?.nome}
+              </p>
+
               <p className="text-xs text-muted-foreground">
-                {perfilPaciente.idade} anos - {perfilPaciente.sexo}
+                {perfilPaciente?.email}
               </p>
             </div>
           </Card>
@@ -62,9 +118,15 @@ export default function ClienteDashboard() {
               <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary text-primary-foreground transition-transform group-hover:scale-110">
                 <CalendarPlus className="h-7 w-7" />
               </div>
+
               <div>
-                <h3 className="font-semibold text-foreground">Criar Consulta</h3>
-                <p className="text-sm text-muted-foreground">Agendar novo atendimento</p>
+                <h3 className="font-semibold text-foreground">
+                  Criar Consulta
+                </h3>
+
+                <p className="text-sm text-muted-foreground">
+                  Agendar novo atendimento
+                </p>
               </div>
             </CardContent>
           </Card>
@@ -76,9 +138,15 @@ export default function ClienteDashboard() {
               <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary transition-transform group-hover:scale-110">
                 <CalendarCheck className="h-7 w-7" />
               </div>
+
               <div>
-                <h3 className="font-semibold text-foreground">Agendamentos</h3>
-                <p className="text-sm text-muted-foreground">{consultasAgendadas} em andamento</p>
+                <h3 className="font-semibold text-foreground">
+                  Agendamentos
+                </h3>
+
+                <p className="text-sm text-muted-foreground">
+                  {consultasAgendadas} em andamento
+                </p>
               </div>
             </CardContent>
           </Card>
@@ -90,9 +158,15 @@ export default function ClienteDashboard() {
               <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary transition-transform group-hover:scale-110">
                 <User className="h-7 w-7" />
               </div>
+
               <div>
-                <h3 className="font-semibold text-foreground">Meu Perfil</h3>
-                <p className="text-sm text-muted-foreground">Dados pessoais</p>
+                <h3 className="font-semibold text-foreground">
+                  Meu Perfil
+                </h3>
+
+                <p className="text-sm text-muted-foreground">
+                  Dados pessoais
+                </p>
               </div>
             </CardContent>
           </Card>
@@ -107,35 +181,65 @@ export default function ClienteDashboard() {
             Próxima Consulta
           </CardTitle>
         </CardHeader>
+
         <CardContent className="space-y-4">
           <div className="flex items-start gap-4">
             <Avatar className="h-14 w-14">
-              <AvatarImage src={proximaConsulta.avatar} alt={proximaConsulta.profissional} />
-              <AvatarFallback className="bg-primary/10 text-primary text-lg">AC</AvatarFallback>
+              <AvatarImage
+                src={proximaConsulta.avatar}
+                alt={proximaConsulta.profissional}
+              />
+
+              <AvatarFallback className="bg-primary/10 text-primary text-lg">
+                AC
+              </AvatarFallback>
             </Avatar>
+
             <div className="flex-1">
-              <h3 className="font-semibold text-foreground">{proximaConsulta.profissional}</h3>
-              <p className="text-sm text-muted-foreground">{proximaConsulta.especialidade}</p>
+              <h3 className="font-semibold text-foreground">
+                {proximaConsulta.profissional}
+              </h3>
+
+              <p className="text-sm text-muted-foreground">
+                {proximaConsulta.especialidade}
+              </p>
             </div>
-            <Badge className="bg-green-100 text-green-700">Confirmada</Badge>
+
+            <Badge className="bg-green-100 text-green-700">
+              Confirmada
+            </Badge>
           </div>
+
           <div className="grid gap-2 rounded-lg bg-muted/50 p-3 sm:grid-cols-3">
             <div className="flex items-center gap-2 text-sm">
               <Calendar className="h-4 w-4 text-muted-foreground" />
-              <span className="text-foreground">{proximaConsulta.data}</span>
+
+              <span className="text-foreground">
+                {proximaConsulta.data}
+              </span>
             </div>
+
             <div className="flex items-center gap-2 text-sm">
               <Clock className="h-4 w-4 text-muted-foreground" />
-              <span className="text-foreground">{proximaConsulta.horario}</span>
+
+              <span className="text-foreground">
+                {proximaConsulta.horario}
+              </span>
             </div>
+
             <div className="flex items-center gap-2 text-sm">
               <MapPin className="h-4 w-4 text-muted-foreground" />
-              <span className="text-foreground">{proximaConsulta.local}</span>
+
+              <span className="text-foreground">
+                {proximaConsulta.local}
+              </span>
             </div>
           </div>
+
           <Button variant="outline" className="w-full" asChild>
             <Link href="/cliente/agendamentos">
               Ver todos os agendamentos
+
               <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
           </Button>
@@ -149,20 +253,33 @@ export default function ClienteDashboard() {
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
               <CalendarCheck className="h-6 w-6 text-primary" />
             </div>
+
             <div>
-              <p className="text-2xl font-bold text-foreground">{consultasAgendadas}</p>
-              <p className="text-sm text-muted-foreground">Consultas em andamento</p>
+              <p className="text-2xl font-bold text-foreground">
+                {consultasAgendadas}
+              </p>
+
+              <p className="text-sm text-muted-foreground">
+                Consultas em andamento
+              </p>
             </div>
           </CardContent>
         </Card>
+
         <Card>
           <CardContent className="flex items-center gap-4 p-5">
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
               <Calendar className="h-6 w-6 text-primary" />
             </div>
+
             <div>
-              <p className="text-2xl font-bold text-foreground">{consultasRealizadas}</p>
-              <p className="text-sm text-muted-foreground">Consultas realizadas</p>
+              <p className="text-2xl font-bold text-foreground">
+                {consultasRealizadas}
+              </p>
+
+              <p className="text-sm text-muted-foreground">
+                Consultas realizadas
+              </p>
             </div>
           </CardContent>
         </Card>

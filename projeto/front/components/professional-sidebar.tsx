@@ -11,6 +11,7 @@ import {
   LogOut,
   User,
   Menu,
+  Home,
   X,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -19,7 +20,7 @@ import { useState } from "react"
 import { logout } from "@/lib/auth"
 
 const navItems = [
-  { href: "/profissional", label: "Agenda", icon: Calendar },
+  { href: "/profissional", label: "Home", icon: Home },
   { href: "/profissional/horarios", label: "Configurar Horários", icon: CalendarClock },
   { href: "/profissional/agendamentos", label: "Agendamentos", icon: CalendarDays },
   { href: "/profissional/solicitacoes", label: "Solicitações", icon: ClipboardList },

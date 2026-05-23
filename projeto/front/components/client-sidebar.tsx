@@ -1,5 +1,7 @@
 "use client"
 
+import { useEffect, useState } from "react"
+
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
@@ -13,7 +15,7 @@ import {
 } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
-import { logout } from "@/lib/auth"
+import { logout, getToken } from "@/lib/auth"
 
 const menuItems = [
   {
@@ -38,8 +40,54 @@ const menuItems = [
   },
 ]
 
+interface UsuarioMe {
+  id: number
+  nome: string
+  email: string
+  telefone: string | null
+  tipo_usuario: string
+}
+
 export function ClientSidebar() {
   const pathname = usePathname()
+
+  const [usuario, setUsuario] = useState<UsuarioMe | null>(null)
+
+  useEffect(() => {
+    async function carregarUsuario() {
+      try {
+        const token = getToken()
+
+        if (!token) {
+          logout()
+          return
+        }
+
+        const response = await fetch("http://localhost:3000/api/v1/me", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+
+        if (response.status === 401) {
+          logout()
+          return
+        }
+
+        if (!response.ok) {
+          throw new Error("Erro ao carregar usuário")
+        }
+
+        const data = await response.json()
+
+        setUsuario(data)
+      } catch (error) {
+        console.error("Erro ao buscar usuário:", error)
+      }
+    }
+
+    carregarUsuario()
+  }, [])
 
   return (
     <aside className="flex h-screen w-64 flex-col border-r border-border bg-sidebar">
@@ -56,6 +104,7 @@ export function ClientSidebar() {
       <nav className="flex-1 space-y-1 px-3 py-4">
         {menuItems.map((item) => {
           const isActive = pathname === item.href
+
           return (
             <Link
               key={item.href}
@@ -78,17 +127,27 @@ export function ClientSidebar() {
         <div className="flex items-center gap-3 rounded-lg bg-sidebar-accent p-3">
           <Avatar className="h-10 w-10">
             <AvatarImage src="/placeholder-user.jpg" alt="Cliente" />
-            <AvatarFallback className="bg-primary/10 text-primary">MO</AvatarFallback>
+
+            <AvatarFallback className="bg-primary/10 text-primary">
+              {usuario?.nome
+                ?.split(" ")
+                .map((n) => n[0])
+                .join("")
+                .slice(0, 2)}
+            </AvatarFallback>
           </Avatar>
+
           <div className="flex-1 truncate">
             <p className="truncate text-sm font-medium text-sidebar-foreground">
-              Maria Oliveira
+              {usuario?.nome}
             </p>
+
             <p className="truncate text-xs text-muted-foreground">
-              maria@email.com
+              {usuario?.email}
             </p>
           </div>
         </div>
+
         <Button
           variant="ghost"
           className="mt-3 w-full justify-start gap-2 text-muted-foreground hover:text-destructive"
