@@ -1,10 +1,9 @@
 {
-  "/_not-found/page": "app/_not-found/page.js",
-  "/cliente/agendamentos/page": "app/cliente/agendamentos/page.js",
-  "/cliente/page": "app/cliente/page.js",
-  "/cliente/perfil/page": "app/cliente/perfil/page.js",
   "/login/page": "app/login/page.js",
   "/page": "app/page.js",
+  "/profissional/agendamentos/page": "app/profissional/agendamentos/page.js",
+  "/profissional/horarios/page": "app/profissional/horarios/page.js",
   "/profissional/page": "app/profissional/page.js",
-  "/profissional/perfil/page": "app/profissional/perfil/page.js"
+  "/profissional/perfil/page": "app/profissional/perfil/page.js",
+  "/profissional/solicitacoes/page": "app/profissional/solicitacoes/page.js"
 }

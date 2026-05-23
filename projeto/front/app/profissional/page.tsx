@@ -19,23 +19,17 @@ interface UsuarioMe {
   tipo_usuario: string
 }
 
-// Consultas de hoje
-const consultasHoje = [
-  { time: "09:00", patient: "Ana Souza", type: "Primeira consulta", status: "confirmed" },
-  { time: "10:00", patient: "Carlos Lima", type: "Retorno", status: "confirmed" },
-  { time: "11:00", patient: "Beatriz Ferreira", type: "Avaliação", status: "pending" },
-  { time: "14:00", patient: "João Mendes", type: "Retorno", status: "confirmed" },
-  { time: "14:30", patient: "Maria Silva", type: "Retorno", status: "pending" },
-  { time: "16:00", patient: "Pedro Alves", type: "Primeira consulta", status: "pending" },
-]
-
-// Estatísticas
-const solicitacoesPendentes = 3
-const consultasConfirmadas = 3
-const consultasPendentes = 3
+interface ConsultaCompleta {
+  id: number
+  paciente_nome: string
+  horario_inicio: string
+  status_consulta: "PENDENTE" | "CONFIRMADA" | "RECUSADA" | "CANCELADA" | "CONCLUIDA"
+  data_disponivel: string
+}
 
 export default function AgendaProfissional() {
   const [perfilProfissional, setPerfilProfissional] = useState<UsuarioMe | null>(null)
+  const [consultasHoje, setConsultasHoje] = useState<ConsultaCompleta[]>([])
 
   useEffect(() => {
     async function carregarUsuario() {
@@ -63,8 +57,28 @@ export default function AgendaProfissional() {
         }
 
         const data = await response.json()
-
         setPerfilProfissional(data)
+
+        // Busca as consultas do profissional
+        const responseConsultas = await fetch("http://localhost:3000/api/v1/consultas/solicitacoes", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+
+        if (responseConsultas.ok) {
+          const todasConsultas: ConsultaCompleta[] = await responseConsultas.json()
+
+          // Filtra apenas as consultas de hoje
+          const hoje = new Date().toISOString().split("T")[0] // "YYYY-MM-DD"
+
+          const deHoje = todasConsultas.filter((c) => {
+            const dataConsulta = String(c.data_disponivel).split("T")[0]
+            return dataConsulta === hoje
+          })
+
+          setConsultasHoje(deHoje)
+        }
       } catch (error) {
         console.error("Erro ao buscar usuário:", error)
       }
@@ -77,19 +91,24 @@ export default function AgendaProfissional() {
     return name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()
   }
 
+  // Totais calculados dinamicamente a partir dos dados reais
+  const consultasConfirmadas = consultasHoje.filter(c => c.status_consulta === "CONFIRMADA").length
+  const consultasPendentes   = consultasHoje.filter(c => c.status_consulta === "PENDENTE").length
+  const solicitacoesPendentes = consultasPendentes
+
   return (
     <div className="flex flex-col gap-8">
       {/* Header com Perfil */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-  <h1 className="text-3xl font-bold tracking-tight text-foreground">
-    Olá, {perfilProfissional?.nome?.split(" ")[0]}!
-  </h1>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">
+            Olá, {perfilProfissional?.nome?.split(" ")[0]}!
+          </h1>
 
-  <p className="mt-1 text-muted-foreground">
-    Bem-vindo ao seu portal profissional.
-  </p>
-</div>
+          <p className="mt-1 text-muted-foreground">
+            Bem-vindo ao seu portal profissional.
+          </p>
+        </div>
 
         <Link href="/profissional/perfil">
           <Card className="flex items-center gap-3 p-3 transition-colors hover:bg-accent/50">
@@ -285,46 +304,46 @@ export default function AgendaProfissional() {
 
         <CardContent>
           <div className="flex flex-col gap-3">
-            {consultasHoje.map((apt) => (
-              <div
-                key={`${apt.time}-${apt.patient}`}
-                className="flex items-center gap-4 rounded-lg border border-border p-4 transition-colors hover:bg-accent/50"
-              >
-                <div className="flex h-12 w-16 items-center justify-center rounded-lg bg-primary/10">
-                  <span className="text-sm font-semibold text-primary">
-                    {apt.time}
-                  </span>
-                </div>
-
-                <Avatar className="h-10 w-10">
-                  <AvatarFallback className="bg-muted text-muted-foreground">
-                    {getInitials(apt.patient)}
-                  </AvatarFallback>
-                </Avatar>
-
-                <div className="flex flex-1 flex-col gap-0.5">
-                  <span className="font-medium text-foreground">
-                    {apt.patient}
-                  </span>
-
-                  <span className="text-sm text-muted-foreground">
-                    {apt.type}
-                  </span>
-                </div>
-
-                <Badge
-                  className={
-                    apt.status === "confirmed"
-                      ? "bg-green-100 text-green-700 hover:bg-green-100"
-                      : "bg-yellow-100 text-yellow-700 hover:bg-yellow-100"
-                  }
+            {consultasHoje.length === 0 ? (
+              <p className="py-4 text-center text-sm text-muted-foreground">
+                Nenhuma consulta para hoje.
+              </p>
+            ) : (
+              consultasHoje.map((apt) => (
+                <div
+                  key={apt.id}
+                  className="flex items-center gap-4 rounded-lg border border-border p-4 transition-colors hover:bg-accent/50"
                 >
-                  {apt.status === "confirmed"
-                    ? "Confirmada"
-                    : "Pendente"}
-                </Badge>
-              </div>
-            ))}
+                  <div className="flex h-12 w-16 items-center justify-center rounded-lg bg-primary/10">
+                    <span className="text-sm font-semibold text-primary">
+                      {apt.horario_inicio}
+                    </span>
+                  </div>
+
+                  <Avatar className="h-10 w-10">
+                    <AvatarFallback className="bg-muted text-muted-foreground">
+                      {getInitials(apt.paciente_nome)}
+                    </AvatarFallback>
+                  </Avatar>
+
+                  <div className="flex flex-1 flex-col gap-0.5">
+                    <span className="font-medium text-foreground">
+                      {apt.paciente_nome}
+                    </span>
+                  </div>
+
+                  <Badge
+                    className={
+                      apt.status_consulta === "CONFIRMADA"
+                        ? "bg-green-100 text-green-700 hover:bg-green-100"
+                        : "bg-yellow-100 text-yellow-700 hover:bg-yellow-100"
+                    }
+                  >
+                    {apt.status_consulta === "CONFIRMADA" ? "Confirmada" : "Pendente"}
+                  </Badge>
+                </div>
+              ))
+            )}
           </div>
         </CardContent>
       </Card>
