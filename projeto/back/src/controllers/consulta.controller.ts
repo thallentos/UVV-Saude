@@ -74,6 +74,22 @@ const consultaController = {
             next(error);
         }
     },
+
+    async cancelar(req: Request, res: Response, next: NextFunction) {
+        try {
+            const paciente_id = req.user!.id;
+            const id = Number(req.params['id']);
+
+            if (isNaN(id)) {
+                return res.status(400).json({ message: 'ID inválido.' });
+            }
+
+            const consulta = await consultaService.cancelar(id, paciente_id);
+            return res.status(200).json(consulta);
+        } catch (error) {
+            next(error);
+        }
+    },
 };
 
 export default consultaController;

@@ -1,5 +1,6 @@
 import consultaRepository, { type ConsultaCompleta } from '../repositories/consulta.repository.js';
 import agendaRepository from '../repositories/agenda.repository.js';
+import db from '../config/database.js';
 import type { Consulta } from '../models/models.js';
 
 const consultaService = {
@@ -78,18 +79,36 @@ const consultaService = {
         await markSlotLivre(consulta.agenda_id);
         return consultaRepository.updateStatus(id, 'RECUSADA');
     },
+
+    async cancelar(id: number, paciente_id: number): Promise<Consulta> {
+        const consulta = await consultaRepository.findById(id);
+
+        if (!consulta) {
+            const err = Object.assign(new Error('Consulta não encontrada.'), { statusCode: 404 });
+            throw err;
+        }
+
+        if (consulta.paciente_id !== paciente_id) {
+            const err = Object.assign(new Error('Sem permissão para cancelar esta consulta.'), { statusCode: 403 });
+            throw err;
+        }
+
+        if (consulta.status_consulta !== 'PENDENTE' && consulta.status_consulta !== 'CONFIRMADA') {
+            const err = Object.assign(new Error('Esta consulta não pode ser cancelada.'), { statusCode: 400 });
+            throw err;
+        }
+
+        await markSlotLivre(consulta.agenda_id);
+        return consultaRepository.updateStatus(id, 'CANCELADA');
+    },
 };
 
 async function markSlotOcupado(agenda_id: number): Promise<void> {
-    await import('../config/database.js').then(({ default: db }) =>
-        db('agendas').where({ id: agenda_id }).update({ status_vaga: 'OCUPADO' })
-    );
+    await db('agendas').where({ id: agenda_id }).update({ status_vaga: 'OCUPADO' });
 }
 
 async function markSlotLivre(agenda_id: number): Promise<void> {
-    await import('../config/database.js').then(({ default: db }) =>
-        db('agendas').where({ id: agenda_id }).update({ status_vaga: 'LIVRE' })
-    );
+    await db('agendas').where({ id: agenda_id }).update({ status_vaga: 'LIVRE' });
 }
 
 export default consultaService;

@@ -1,5 +1,8 @@
 "use client"
 
+import { getToken } from "@/lib/auth"
+import { getInitials } from "@/lib/utils"
+import { API_URL } from "@/lib/api"
 import { useState, useEffect, useCallback } from "react"
 import { Search, Star, MapPin, Loader2, Clock, ChevronLeft, ChevronRight, Calendar } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -23,8 +26,6 @@ import {
 } from "@/components/ui/dialog"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
-
-const API_URL = "http://localhost:3000"
 
 const meses = [
   "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
@@ -51,14 +52,6 @@ interface Slot {
   data_disponivel: string
   horario_inicio: string
   status_vaga: "LIVRE" | "OCUPADO"
-}
-
-function getToken(): string {
-  return localStorage.getItem("token") ?? ""
-}
-
-function getInitials(nome: string): string {
-  return nome.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()
 }
 
 function gerarDiasDoMes(ano: number, mes: number): string[] {

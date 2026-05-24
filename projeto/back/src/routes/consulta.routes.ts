@@ -30,6 +30,13 @@ router.get(
     consultaController.minhasConsultas
 );
 
+router.put(
+    '/:id/cancelar',
+    authenticate,
+    authorize('PACIENTE'),
+    consultaController.cancelar
+);
+
 // Rotas do profissional
 router.get(
     '/solicitacoes',

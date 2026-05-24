@@ -7,6 +7,8 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { getToken, logout } from "@/lib/auth"
+import { getInitials } from "@/lib/utils"
+import { API_URL } from "@/lib/api"
 import Link from "next/link"
 
 interface ConsultaCompleta {
@@ -33,24 +35,14 @@ export default function AgendamentosClientePage() {
     async function carregarConsultas() {
       try {
         const token = getToken()
+        if (!token) { logout(); return }
 
-        if (!token) {
-          logout()
-          return
-        }
-
-        const response = await fetch("http://localhost:3000/api/v1/consultas/minhas", {
+        const response = await fetch(`${API_URL}/api/v1/consultas/minhas`, {
           headers: { Authorization: `Bearer ${token}` },
         })
 
-        if (response.status === 401) {
-          logout()
-          return
-        }
-
-        if (!response.ok) {
-          throw new Error("Erro ao carregar consultas")
-        }
+        if (response.status === 401) { logout(); return }
+        if (!response.ok) throw new Error("Erro ao carregar consultas")
 
         const data: ConsultaCompleta[] = await response.json()
         setConsultas(data)
@@ -62,15 +54,29 @@ export default function AgendamentosClientePage() {
     carregarConsultas()
   }, [])
 
+  async function cancelarConsulta(id: number) {
+    try {
+      const token = getToken()
+      const response = await fetch(`${API_URL}/api/v1/consultas/${id}/cancelar`, {
+        method: "PUT",
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      if (!response.ok) throw new Error()
+      setConsultas(prev =>
+        prev.map(c => c.id === id ? { ...c, status_consulta: "CANCELADA" as const } : c)
+      )
+    } catch {
+      console.error("Erro ao cancelar consulta")
+    }
+  }
+
   const hoje = new Date().toISOString().split("T")[0]
 
-  // Em andamento: somente CONFIRMADAS com data futura ou de hoje
   const emAndamento = consultas.filter((c) => {
     const data = String(c.data_disponivel).split("T")[0]
     return data >= hoje && c.status_consulta === "CONFIRMADA"
   })
 
-  // Histórico: passadas ou com status final
   const historico = consultas.filter((c) => {
     const data = String(c.data_disponivel).split("T")[0]
     return (
@@ -145,9 +151,22 @@ export default function AgendamentosClientePage() {
         </div>
 
         {consulta.observacoes && (
-          <p className="mt-3 text-sm text-muted-foreground border-t border-border pt-3">
+          <p className="mt-3 border-t border-border pt-3 text-sm text-muted-foreground">
             {consulta.observacoes}
           </p>
+        )}
+
+        {consulta.status_consulta === "CONFIRMADA" && (
+          <div className="mt-3 border-t border-border pt-3">
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-destructive hover:text-destructive"
+              onClick={() => cancelarConsulta(consulta.id)}
+            >
+              Cancelar consulta
+            </Button>
+          </div>
         )}
       </CardContent>
     </Card>
@@ -155,7 +174,6 @@ export default function AgendamentosClientePage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-foreground">Agendamentos</h1>
         <p className="text-muted-foreground">
@@ -163,14 +181,12 @@ export default function AgendamentosClientePage() {
         </p>
       </div>
 
-      {/* Tabs */}
       <Tabs defaultValue="andamento" className="space-y-6">
         <TabsList className="grid w-full max-w-md grid-cols-2">
           <TabsTrigger value="andamento">Em Andamento</TabsTrigger>
           <TabsTrigger value="historico">Histórico</TabsTrigger>
         </TabsList>
 
-        {/* Em Andamento */}
         <TabsContent value="andamento" className="space-y-4">
           {emAndamento.length === 0 ? (
             <Card>
@@ -188,30 +204,23 @@ export default function AgendamentosClientePage() {
               </CardContent>
             </Card>
           ) : (
-            <div className="grid gap-4">
-              {emAndamento.map(renderCard)}
-            </div>
+            <div className="grid gap-4">{emAndamento.map(renderCard)}</div>
           )}
         </TabsContent>
 
-        {/* Histórico */}
         <TabsContent value="historico" className="space-y-4">
           {historico.length === 0 ? (
             <Card>
               <CardContent className="flex flex-col items-center justify-center py-12">
                 <FileText className="h-12 w-12 text-muted-foreground/50" />
-                <h3 className="mt-4 font-semibold text-foreground">
-                  Nenhum histórico
-                </h3>
+                <h3 className="mt-4 font-semibold text-foreground">Nenhum histórico</h3>
                 <p className="mt-1 text-sm text-muted-foreground">
                   Você ainda não possui consultas no histórico
                 </p>
               </CardContent>
             </Card>
           ) : (
-            <div className="grid gap-4">
-              {historico.map(renderCard)}
-            </div>
+            <div className="grid gap-4">{historico.map(renderCard)}</div>
           )}
         </TabsContent>
       </Tabs>

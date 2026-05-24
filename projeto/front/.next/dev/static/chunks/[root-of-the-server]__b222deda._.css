@@ -262,7 +262,6 @@
     --color-red-600: #e40014;
     --color-red-700: #bf000f;
     --color-yellow-100: #fef9c2;
-    --color-yellow-400: #fac800;
     --color-yellow-700: #a36100;
     --color-green-100: #dcfce7;
     --color-green-500: #00c758;
@@ -333,7 +332,6 @@
       --color-red-600: lab(48.4493% 77.4328 61.5452);
       --color-red-700: lab(40.4273% 67.2623 53.7441);
       --color-yellow-100: lab(97.3564% -4.51407 27.344);
-      --color-yellow-400: lab(83.2664% 8.65132 106.895);
       --color-yellow-700: lab(47.8202% 25.2426 66.5015);
       --color-green-100: lab(96.186% -13.8464 6.52362);
       --color-green-500: lab(70.5521% -66.5147 45.8072);
@@ -824,40 +822,6 @@
     grid-row-start: 1;
   }
 
-  .container {
-    width: 100%;
-  }
-
-  @media (min-width: 40rem) {
-    .container {
-      max-width: 40rem;
-    }
-  }
-
-  @media (min-width: 48rem) {
-    .container {
-      max-width: 48rem;
-    }
-  }
-
-  @media (min-width: 64rem) {
-    .container {
-      max-width: 64rem;
-    }
-  }
-
-  @media (min-width: 80rem) {
-    .container {
-      max-width: 80rem;
-    }
-  }
-
-  @media (min-width: 96rem) {
-    .container {
-      max-width: 96rem;
-    }
-  }
-
   .\!m-0 {
     margin: calc(var(--spacing) * 0) !important;
   }
@@ -1207,10 +1171,6 @@
 
   .h-px {
     height: 1px;
-  }
-
-  .h-screen {
-    height: 100vh;
   }
 
   .h-svh {
@@ -2217,10 +2177,6 @@
     background-color: var(--sidebar);
   }
 
-  .bg-sidebar-accent {
-    background-color: var(--sidebar-accent);
-  }
-
   .bg-sidebar-border {
     background-color: var(--sidebar-border);
   }
@@ -2271,10 +2227,6 @@
 
   .fill-primary {
     fill: var(--primary);
-  }
-
-  .fill-yellow-400 {
-    fill: var(--color-yellow-400);
   }
 
   .p-0 {
@@ -2649,16 +2601,6 @@
     color: var(--muted-foreground);
   }
 
-  .text-muted-foreground\/30 {
-    color: var(--muted-foreground);
-  }
-
-  @supports (color: color-mix(in lab, red, red)) {
-    .text-muted-foreground\/30 {
-      color: color-mix(in oklab, var(--muted-foreground) 30%, transparent);
-    }
-  }
-
   .text-muted-foreground\/40 {
     color: var(--muted-foreground);
   }
@@ -2719,10 +2661,6 @@
 
   .text-white {
     color: var(--color-white);
-  }
-
-  .text-yellow-400 {
-    color: var(--color-yellow-400);
   }
 
   .text-yellow-700 {

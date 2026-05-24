@@ -1,5 +1,8 @@
 "use client"
 
+import { getToken, logout } from "@/lib/auth"
+import { getInitials } from "@/lib/utils"
+import { API_URL } from "@/lib/api"
 import { useState, useEffect, useCallback } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -17,8 +20,6 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Calendar, Clock, Check, X, Search, Mail, Loader2, FileText } from "lucide-react"
 
-const API_URL = "http://localhost:3000"
-
 interface Consulta {
   id: number
   paciente_id: number
@@ -34,14 +35,6 @@ interface Consulta {
   observacoes: string | null
   created_at: string
   updated_at: string
-}
-
-function getToken(): string {
-  return localStorage.getItem("token") ?? ""
-}
-
-function getInitials(nome: string): string {
-  return nome.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()
 }
 
 function formatarData(dataStr: string): string {

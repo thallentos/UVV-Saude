@@ -1,5 +1,7 @@
 "use client"
 
+import { getToken } from "@/lib/auth"
+import { API_URL } from "@/lib/api"
 import { useState, useEffect, useCallback } from "react"
 import { ChevronLeft, ChevronRight, Plus, Trash2, Pencil, Check, X, Loader2, Clock } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -19,8 +21,6 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog"
-
-const API_URL = "http://localhost:3000"
 
 const meses = [
   "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
@@ -53,10 +53,6 @@ interface SlotNovo {
 interface DiaInfo {
   data: string
   slots: Slot[]
-}
-
-function getToken(): string {
-  return localStorage.getItem("token") ?? ""
 }
 
 function formatarData(dataStr: string): string {
