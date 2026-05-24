@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { API_URL } from "@/lib/api"
 
 type UserType = "paciente" | "profissional" | null
 
@@ -79,11 +80,9 @@ export default function CadastroPage() {
               bio: formData.bio,
             }
 
-      const response = await fetch("http://localhost:3000/api/v1/auth/register", {
+      const response = await fetch(`${API_URL}/api/v1/auth/register`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       })
 
@@ -101,8 +100,8 @@ export default function CadastroPage() {
       } else {
         router.push("/profissional")
       }
-    } catch (err: any) {
-      setError(err.message || "Erro inesperado ao criar conta.")
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Erro inesperado ao criar conta.")
     } finally {
       setLoading(false)
     }
@@ -151,13 +150,11 @@ export default function CadastroPage() {
                       userType === "paciente" ? "border-primary bg-primary/5" : "border-border bg-card"
                     }`}
                   >
-                    <div
-                      className={`flex h-14 w-14 items-center justify-center rounded-full ${
-                        userType === "paciente"
-                          ? "bg-primary text-primary-foreground"
-                          : "bg-muted text-muted-foreground"
-                      }`}
-                    >
+                    <div className={`flex h-14 w-14 items-center justify-center rounded-full ${
+                      userType === "paciente"
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-muted text-muted-foreground"
+                    }`}>
                       <User className="h-7 w-7" />
                     </div>
                     <div className="text-center">
@@ -173,13 +170,11 @@ export default function CadastroPage() {
                       userType === "profissional" ? "border-primary bg-primary/5" : "border-border bg-card"
                     }`}
                   >
-                    <div
-                      className={`flex h-14 w-14 items-center justify-center rounded-full ${
-                        userType === "profissional"
-                          ? "bg-primary text-primary-foreground"
-                          : "bg-muted text-muted-foreground"
-                      }`}
-                    >
+                    <div className={`flex h-14 w-14 items-center justify-center rounded-full ${
+                      userType === "profissional"
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-muted text-muted-foreground"
+                    }`}>
                       <Stethoscope className="h-7 w-7" />
                     </div>
                     <div className="text-center">
@@ -202,7 +197,7 @@ export default function CadastroPage() {
                     id="nome"
                     placeholder="Seu nome"
                     value={formData.nome}
-                    onChange={(e) => handleInputChange("nome", e.target.value)}
+                    onChange={e => handleInputChange("nome", e.target.value)}
                     required
                   />
                 </div>
@@ -214,7 +209,7 @@ export default function CadastroPage() {
                     type="email"
                     placeholder="seu@email.com"
                     value={formData.email}
-                    onChange={(e) => handleInputChange("email", e.target.value)}
+                    onChange={e => handleInputChange("email", e.target.value)}
                     required
                   />
                 </div>
@@ -225,7 +220,7 @@ export default function CadastroPage() {
                     id="cpf"
                     placeholder="12345678901"
                     value={formData.cpf}
-                    onChange={(e) => handleInputChange("cpf", e.target.value)}
+                    onChange={e => handleInputChange("cpf", e.target.value)}
                     required
                   />
                 </div>
@@ -237,7 +232,7 @@ export default function CadastroPage() {
                       id="telefone"
                       placeholder="27999990000"
                       value={formData.telefone}
-                      onChange={(e) => handleInputChange("telefone", e.target.value)}
+                      onChange={e => handleInputChange("telefone", e.target.value)}
                       required
                     />
                   </div>
@@ -248,7 +243,7 @@ export default function CadastroPage() {
                       id="matricula"
                       placeholder={userType === "paciente" ? "M01" : "P01"}
                       value={formData.matricula}
-                      onChange={(e) => handleInputChange("matricula", e.target.value)}
+                      onChange={e => handleInputChange("matricula", e.target.value)}
                       required
                     />
                   </div>
@@ -260,7 +255,7 @@ export default function CadastroPage() {
                       <Label htmlFor="especialidade_id">Especialidade</Label>
                       <Select
                         value={formData.especialidade_id}
-                        onValueChange={(v) => handleInputChange("especialidade_id", v)}
+                        onValueChange={v => handleInputChange("especialidade_id", v)}
                       >
                         <SelectTrigger id="especialidade_id">
                           <SelectValue placeholder="Selecione sua especialidade" />
@@ -278,7 +273,7 @@ export default function CadastroPage() {
                         id="registro_prof"
                         placeholder="CRP-01"
                         value={formData.registro_prof}
-                        onChange={(e) => handleInputChange("registro_prof", e.target.value)}
+                        onChange={e => handleInputChange("registro_prof", e.target.value)}
                         required
                       />
                     </div>
@@ -289,7 +284,7 @@ export default function CadastroPage() {
                         id="bio"
                         placeholder="Psicólogo"
                         value={formData.bio}
-                        onChange={(e) => handleInputChange("bio", e.target.value)}
+                        onChange={e => handleInputChange("bio", e.target.value)}
                         required
                       />
                     </div>
@@ -303,7 +298,7 @@ export default function CadastroPage() {
                     type="password"
                     placeholder="Mínimo 6 caracteres"
                     value={formData.senha}
-                    onChange={(e) => handleInputChange("senha", e.target.value)}
+                    onChange={e => handleInputChange("senha", e.target.value)}
                     required
                   />
                 </div>
@@ -315,12 +310,16 @@ export default function CadastroPage() {
                     type="password"
                     placeholder="Repita a senha"
                     value={formData.confirmarSenha}
-                    onChange={(e) => handleInputChange("confirmarSenha", e.target.value)}
+                    onChange={e => handleInputChange("confirmarSenha", e.target.value)}
                     required
                   />
                 </div>
 
-                {error && <p className="text-sm text-red-500">{error}</p>}
+                {error && (
+                  <div className="rounded-lg border border-destructive/50 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                    {error}
+                  </div>
+                )}
 
                 <div className="flex gap-3 pt-2">
                   <Button type="button" variant="outline" onClick={() => setStep(1)}>

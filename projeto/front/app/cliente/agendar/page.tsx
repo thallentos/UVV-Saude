@@ -4,7 +4,7 @@ import { getToken } from "@/lib/auth"
 import { getInitials } from "@/lib/utils"
 import { API_URL } from "@/lib/api"
 import { useState, useEffect, useCallback } from "react"
-import { Search, Star, MapPin, Loader2, Clock, ChevronLeft, ChevronRight, Calendar } from "lucide-react"
+import { Search, Star, Loader2, Clock, ChevronLeft, ChevronRight, Calendar } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -119,6 +119,13 @@ export default function AgendarConsultaPage() {
     carregarProfissionais()
   }, [carregarProfissionais])
 
+  // Especialidades derivadas dinamicamente dos profissionais carregados
+  const especialidades = Array.from(
+    new Map(
+      profissionais.map(p => [p.especialidade_id, p.especialidade_nome])
+    ).entries()
+  ).map(([id, nome]) => ({ id, nome }))
+
   async function abrirAgenda(profissional: Profissional) {
     setProfissionalSelecionado(profissional)
     setDiaSelecionado(null)
@@ -155,10 +162,9 @@ export default function AgendarConsultaPage() {
   }
 
   function slotsDoDia(data: string): Slot[] {
-    return slots.filter(s => {
-      const d = s.data_disponivel.split("T")[0]
-      return d === data
-    }).sort((a, b) => a.horario_inicio.localeCompare(b.horario_inicio))
+    return slots
+      .filter(s => s.data_disponivel.split("T")[0] === data)
+      .sort((a, b) => a.horario_inicio.localeCompare(b.horario_inicio))
   }
 
   function diasComSlots(): Set<string> {
@@ -246,14 +252,18 @@ export default function AgendarConsultaPage() {
             className="pl-10"
           />
         </div>
+
         <Select value={filtroEspecialidade} onValueChange={setFiltroEspecialidade}>
           <SelectTrigger className="w-full sm:w-52">
             <SelectValue placeholder="Especialidade" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="todas">Todas as especialidades</SelectItem>
-            <SelectItem value="1">Psicologia</SelectItem>
-            <SelectItem value="2">Nutrição</SelectItem>
+            {especialidades.map(e => (
+              <SelectItem key={e.id} value={String(e.id)}>
+                {e.nome}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>
@@ -284,20 +294,20 @@ export default function AgendarConsultaPage() {
                       {getInitials(prof.nome)}
                     </AvatarFallback>
                   </Avatar>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-foreground truncate">{prof.nome}</h3>
+                  <div className="min-w-0 flex-1">
+                    <h3 className="truncate font-semibold text-foreground">{prof.nome}</h3>
                     <p className="text-sm text-muted-foreground">{prof.especialidade_nome}</p>
                     <Badge variant="secondary" className="mt-2 text-xs">
                       {prof.registro_prof}
                     </Badge>
                     {prof.bio && (
-                      <p className="mt-2 text-xs text-muted-foreground line-clamp-2">
+                      <p className="mt-2 line-clamp-2 text-xs text-muted-foreground">
                         {prof.bio}
                       </p>
                     )}
                   </div>
                 </div>
-                <div className="mt-4 flex items-center gap-2 text-sm text-primary font-medium">
+                <div className="mt-4 flex items-center gap-2 text-sm font-medium text-primary">
                   <Calendar className="h-4 w-4" />
                   Ver horários disponíveis
                 </div>
@@ -309,7 +319,7 @@ export default function AgendarConsultaPage() {
 
       {/* Modal de agenda do profissional */}
       <Dialog open={modalAberto} onOpenChange={fecharModal}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-3">
               {profissionalSelecionado && (
@@ -396,7 +406,7 @@ export default function AgendarConsultaPage() {
                   <div className="rounded-lg border border-border p-3">
                     <div className="mb-2 grid grid-cols-7 gap-1">
                       {diasSemanaAbrev.map(d => (
-                        <div key={d} className="text-center text-xs font-medium text-muted-foreground py-1">
+                        <div key={d} className="py-1 text-center text-xs font-medium text-muted-foreground">
                           {d}
                         </div>
                       ))}
@@ -420,9 +430,9 @@ export default function AgendarConsultaPage() {
                             className={`
                               relative flex flex-col items-center justify-center rounded-lg p-1.5 text-sm
                               transition-all
-                              ${passado ? "opacity-30 cursor-not-allowed" : ""}
-                              ${!temSlot && !passado ? "text-muted-foreground/40 cursor-not-allowed" : ""}
-                              ${temSlot && !passado ? "hover:bg-accent cursor-pointer" : ""}
+                              ${passado ? "cursor-not-allowed opacity-30" : ""}
+                              ${!temSlot && !passado ? "cursor-not-allowed text-muted-foreground/40" : ""}
+                              ${temSlot && !passado ? "cursor-pointer hover:bg-accent" : ""}
                               ${ehHoje ? "border-2 border-primary font-bold" : "border border-transparent"}
                               ${selecionado ? "bg-primary text-primary-foreground hover:bg-primary" : ""}
                             `}
@@ -471,9 +481,9 @@ export default function AgendarConsultaPage() {
                     </div>
                   )}
 
-                  {/* Botão de confirmar */}
+                  {/* Resumo e confirmação */}
                   {slotSelecionado && (
-                    <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 space-y-3">
+                    <div className="space-y-3 rounded-lg border border-primary/20 bg-primary/5 p-4">
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="text-sm font-medium text-foreground">Horário selecionado</p>
@@ -489,7 +499,7 @@ export default function AgendarConsultaPage() {
                           placeholder="Descreva o motivo da consulta ou informações relevantes..."
                           value={observacoes}
                           onChange={e => setObservacoes(e.target.value)}
-                          className="min-h-[80px] text-sm resize-none"
+                          className="min-h-[80px] resize-none text-sm"
                         />
                       </div>
                       <Button
@@ -517,7 +527,7 @@ export default function AgendarConsultaPage() {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-3 py-2">
-            <div className="rounded-lg bg-muted/50 p-4 space-y-2 text-sm">
+            <div className="space-y-2 rounded-lg bg-muted/50 p-4 text-sm">
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Profissional</span>
                 <span className="font-medium text-foreground">{profissionalSelecionado?.nome}</span>
@@ -539,7 +549,7 @@ export default function AgendarConsultaPage() {
                 </span>
               </div>
             </div>
-            <p className="text-xs text-muted-foreground text-center">
+            <p className="text-center text-xs text-muted-foreground">
               Sua solicitação ficará pendente até o profissional aprovar.
             </p>
           </div>

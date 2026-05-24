@@ -7,7 +7,6 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { getToken, logout } from "@/lib/auth"
-import { getInitials } from "@/lib/utils"
 import { API_URL } from "@/lib/api"
 import Link from "next/link"
 
@@ -30,6 +29,7 @@ interface ConsultaCompleta {
 
 export default function AgendamentosClientePage() {
   const [consultas, setConsultas] = useState<ConsultaCompleta[]>([])
+  const [erroCancelamento, setErroCancelamento] = useState("")
 
   useEffect(() => {
     async function carregarConsultas() {
@@ -61,12 +61,19 @@ export default function AgendamentosClientePage() {
         method: "PUT",
         headers: { Authorization: `Bearer ${token}` },
       })
-      if (!response.ok) throw new Error()
+
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.message ?? "Erro ao cancelar consulta.")
+      }
+
       setConsultas(prev =>
         prev.map(c => c.id === id ? { ...c, status_consulta: "CANCELADA" as const } : c)
       )
-    } catch {
-      console.error("Erro ao cancelar consulta")
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : "Erro ao cancelar consulta."
+      setErroCancelamento(msg)
+      setTimeout(() => setErroCancelamento(""), 4000)
     }
   }
 
@@ -180,6 +187,13 @@ export default function AgendamentosClientePage() {
           Acompanhe suas consultas confirmadas e seu histórico
         </p>
       </div>
+
+      {/* Erro de cancelamento visível para o usuário */}
+      {erroCancelamento && (
+        <div className="rounded-lg border border-destructive/50 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+          {erroCancelamento}
+        </div>
+      )}
 
       <Tabs defaultValue="andamento" className="space-y-6">
         <TabsList className="grid w-full max-w-md grid-cols-2">

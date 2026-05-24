@@ -50,11 +50,6 @@ interface SlotNovo {
   horario: string
 }
 
-interface DiaInfo {
-  data: string
-  slots: Slot[]
-}
-
 function formatarData(dataStr: string): string {
   const [ano, mes, dia] = dataStr.split("-")
   return `${dia}/${mes}/${ano}`
@@ -121,6 +116,14 @@ export default function HorariosPage() {
   }
 
   function abrirDia(data: string) {
+    // Bloqueia abertura de datas passadas
+    const hoje = new Date().toISOString().split("T")[0]
+    if (data < hoje) {
+      setErro("Não é possível configurar horários em datas passadas.")
+      setTimeout(() => setErro(""), 3000)
+      return
+    }
+
     setDiaSelecionado(data)
     setSlotsNovos([])
     setEditandoId(null)
@@ -256,6 +259,7 @@ export default function HorariosPage() {
     else setMesAtual(m => m + 1)
   }
 
+  const hoje = new Date().toISOString().split("T")[0]
   const dias = gerarDiasDoMes(anoAtual, mesAtual)
   const offset = primeiroDiaSemana(anoAtual, mesAtual)
   const slotsDoMes = slots.filter(s => {
@@ -263,18 +267,23 @@ export default function HorariosPage() {
     return d.startsWith(`${anoAtual}-${String(mesAtual + 1).padStart(2, "0")}`)
   })
   const diasComSlots = [...new Set(slotsDoMes.map(s => s.data_disponivel.split("T")[0]))]
-
   const slotsDiaSelecionado = diaSelecionado ? slotsDoDia(diaSelecionado) : []
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-foreground">Configurar Horários</h1>
         <p className="text-muted-foreground">
           Clique em um dia para adicionar ou editar horários
         </p>
       </div>
+
+      {/* Feedback global (ex: tentativa de abrir data passada) */}
+      {erro && !painelAberto && (
+        <div className="rounded-lg border border-destructive/50 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+          {erro}
+        </div>
+      )}
 
       {/* Navegação do mês */}
       <Card>
@@ -303,6 +312,10 @@ export default function HorariosPage() {
           <div className="h-3 w-3 rounded-full border border-border bg-background" />
           <span>Sem horários</span>
         </div>
+        <div className="flex items-center gap-2">
+          <div className="h-3 w-3 rounded-full bg-muted" />
+          <span>Data passada</span>
+        </div>
       </div>
 
       {/* Calendário */}
@@ -313,7 +326,6 @@ export default function HorariosPage() {
       ) : (
         <Card>
           <CardContent className="p-4">
-            {/* Cabeçalho dias da semana */}
             <div className="mb-2 grid grid-cols-7 gap-1">
               {diasSemanaAbrev.map(d => (
                 <div key={d} className="text-center text-xs font-medium text-muted-foreground py-1">
@@ -322,9 +334,7 @@ export default function HorariosPage() {
               ))}
             </div>
 
-            {/* Grid de dias */}
             <div className="grid grid-cols-7 gap-1">
-              {/* Espaços vazios antes do primeiro dia */}
               {Array.from({ length: offset }).map((_, i) => (
                 <div key={`empty-${i}`} />
               ))}
@@ -332,7 +342,8 @@ export default function HorariosPage() {
               {dias.map(data => {
                 const temSlot = temSlots(data)
                 const diaNum = Number(data.split("-")[2])
-                const ehHoje = data === new Date().toISOString().split("T")[0]
+                const ehHoje = data === hoje
+                const passado = data < hoje
 
                 return (
                   <button
@@ -340,7 +351,11 @@ export default function HorariosPage() {
                     onClick={() => abrirDia(data)}
                     className={`
                       relative flex flex-col items-center justify-center rounded-lg p-2 text-sm
-                      transition-all hover:bg-accent hover:text-accent-foreground
+                      transition-all
+                      ${passado
+                        ? "opacity-40 cursor-not-allowed text-muted-foreground"
+                        : "hover:bg-accent hover:text-accent-foreground cursor-pointer"
+                      }
                       ${ehHoje ? "border-2 border-primary font-bold" : "border border-transparent"}
                       ${diaSelecionado === data ? "bg-primary text-primary-foreground" : ""}
                     `}
@@ -379,7 +394,6 @@ export default function HorariosPage() {
           </DialogHeader>
 
           <div className="space-y-4">
-            {/* Feedback */}
             {erro && (
               <div className="rounded-lg border border-destructive/50 bg-destructive/10 px-3 py-2 text-sm text-destructive">
                 {erro}
@@ -446,10 +460,20 @@ export default function HorariosPage() {
                       <span className="flex-1 text-sm font-medium text-foreground">
                         {slot.horario_inicio.slice(0, 5)}
                       </span>
+
+                      {/* Badge visual para slot ocupado */}
+                      {slot.status_vaga === "OCUPADO" && (
+                        <Badge className="bg-yellow-100 text-yellow-700 text-xs hover:bg-yellow-100">
+                          Ocupado
+                        </Badge>
+                      )}
+
                       <Button
                         size="icon"
                         variant="ghost"
                         className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                        disabled={slot.status_vaga === "OCUPADO"}
+                        title={slot.status_vaga === "OCUPADO" ? "Não é possível editar um horário com consulta agendada" : "Editar"}
                         onClick={() => iniciarEdicao(slot)}
                       >
                         <Pencil className="h-3.5 w-3.5" />
@@ -458,7 +482,8 @@ export default function HorariosPage() {
                         size="icon"
                         variant="ghost"
                         className="h-8 w-8 text-destructive hover:text-destructive"
-                        disabled={salvando}
+                        disabled={salvando || slot.status_vaga === "OCUPADO"}
+                        title={slot.status_vaga === "OCUPADO" ? "Não é possível remover um horário com consulta agendada" : "Remover"}
                         onClick={() => deletarSlot(slot.id)}
                       >
                         <Trash2 className="h-3.5 w-3.5" />

@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { API_URL } from "@/lib/api"
 
 export default function LoginPage() {
   const router = useRouter()
@@ -22,7 +23,7 @@ export default function LoginPage() {
     setCarregando(true)
 
     try {
-      const response = await fetch("http://localhost:3000/api/v1/auth/login", {
+      const response = await fetch(`${API_URL}/api/v1/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: formData.email, senha: formData.senha }),
@@ -35,11 +36,9 @@ export default function LoginPage() {
         return
       }
 
-      // Salva no localStorage
       localStorage.setItem("token", data.token)
       localStorage.setItem("usuario", JSON.stringify(data.usuario))
 
-      // Salva cookies para o middleware conseguir ler
       const expires = new Date()
       expires.setDate(expires.getDate() + 7)
       document.cookie = `auth_token=${data.token}; path=/; expires=${expires.toUTCString()}; SameSite=Lax`
@@ -95,9 +94,7 @@ export default function LoginPage() {
                 />
               </div>
               <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="senha">Senha</Label>
-                </div>
+                <Label htmlFor="senha">Senha</Label>
                 <div className="relative">
                   <Input
                     id="senha"

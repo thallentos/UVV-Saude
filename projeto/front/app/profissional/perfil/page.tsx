@@ -12,8 +12,8 @@ import { Badge } from "@/components/ui/badge"
 import { Save, Bell, Shield, User, Loader2 } from "lucide-react"
 import { Switch } from "@/components/ui/switch"
 import { getToken, logout } from "@/lib/auth"
-
-const API_URL = "http://localhost:3000"
+import { getInitials } from "@/lib/utils"
+import { API_URL } from "@/lib/api"
 
 interface ProfissionalMe {
   id: number
@@ -29,10 +29,6 @@ interface ProfissionalMe {
   registro_prof: string | null
   especialidade_id: number | null
   especialidade_nome: string | null
-}
-
-function getInitials(nome: string): string {
-  return nome.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()
 }
 
 export default function PerfilProfissional() {
@@ -180,7 +176,6 @@ export default function PerfilProfissional() {
 
         {/* Dados Profissionais */}
         <TabsContent value="profissional" className="space-y-6">
-          {/* Avatar */}
           <Card>
             <CardContent className="flex items-center gap-6 p-6">
               <Avatar className="h-24 w-24">
@@ -198,7 +193,6 @@ export default function PerfilProfissional() {
             </CardContent>
           </Card>
 
-          {/* Formulário */}
           <Card>
             <CardHeader>
               <CardTitle>Informações Profissionais</CardTitle>
@@ -291,6 +285,9 @@ export default function PerfilProfissional() {
                   <Switch />
                 </div>
               ))}
+              <p className="text-xs text-muted-foreground pt-2">
+                * As preferências de notificação serão implementadas em breve.
+              </p>
             </CardContent>
           </Card>
         </TabsContent>

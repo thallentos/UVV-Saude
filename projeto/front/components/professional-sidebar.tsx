@@ -7,7 +7,6 @@ import {
   CalendarDays,
   CalendarClock,
   ClipboardList,
-  Calendar,
   LogOut,
   User,
   Menu,
@@ -16,8 +15,11 @@ import {
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { useState } from "react"
-import { logout } from "@/lib/auth"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { useState, useEffect } from "react"
+import { logout, getToken } from "@/lib/auth"
+import { getInitials } from "@/lib/utils"
+import { API_URL } from "@/lib/api"
 
 const navItems = [
   { href: "/profissional", label: "Home", icon: Home },
@@ -27,9 +29,36 @@ const navItems = [
   { href: "/profissional/perfil", label: "Meu Perfil", icon: User },
 ]
 
+interface UsuarioMe {
+  id: number
+  nome: string
+  email: string
+}
+
 export function ProfessionalSidebar() {
   const pathname = usePathname()
   const [open, setOpen] = useState(false)
+  const [usuario, setUsuario] = useState<UsuarioMe | null>(null)
+
+  useEffect(() => {
+    async function carregarUsuario() {
+      try {
+        const token = getToken()
+        if (!token) return
+
+        const res = await fetch(`${API_URL}/api/v1/me`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        if (!res.ok) return
+
+        const data = await res.json()
+        setUsuario(data)
+      } catch {
+        // silencioso — sidebar não bloqueia a página
+      }
+    }
+    carregarUsuario()
+  }, [])
 
   return (
     <>
@@ -63,7 +92,10 @@ export function ProfessionalSidebar() {
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary">
             <Heart className="h-5 w-5 text-primary-foreground" />
           </div>
-          <span className="text-lg font-bold text-foreground">UVV Health</span>
+          <div>
+            <h1 className="font-semibold text-foreground">UVV Health</h1>
+            <p className="text-xs text-muted-foreground">Portal do Profissional</p>
+          </div>
         </div>
 
         <nav className="flex flex-1 flex-col gap-1 px-3 py-4" role="navigation" aria-label="Menu do profissional">
@@ -77,7 +109,7 @@ export function ProfessionalSidebar() {
                 className={cn(
                   "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
                   isActive
-                    ? "bg-primary/10 text-primary"
+                    ? "bg-primary text-primary-foreground"
                     : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                 )}
               >
@@ -88,10 +120,25 @@ export function ProfessionalSidebar() {
           })}
         </nav>
 
-        <div className="border-t border-border p-4 space-y-2">
-          <Link href="/" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
-            Voltar ao início
-          </Link>
+        <div className="border-t border-border p-4 space-y-3">
+          {usuario && (
+            <div className="flex items-center gap-3 rounded-lg bg-accent p-3">
+              <Avatar className="h-10 w-10">
+                <AvatarFallback className="bg-primary/10 text-primary">
+                  {getInitials(usuario.nome)}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex-1 truncate">
+                <p className="truncate text-sm font-medium text-foreground">
+                  {usuario.nome}
+                </p>
+                <p className="truncate text-xs text-muted-foreground">
+                  {usuario.email}
+                </p>
+              </div>
+            </div>
+          )}
+
           <button
             onClick={logout}
             className="flex items-center gap-2 text-sm text-muted-foreground hover:text-destructive"
