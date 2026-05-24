@@ -10,6 +10,8 @@ import { Calendar, Clock, ArrowRight, CalendarPlus, CalendarCheck, User } from "
 import Link from "next/link"
 
 import { getToken, logout } from "@/lib/auth"
+import { getInitials } from "@/lib/utils"
+import { API_URL } from "@/lib/api"
 
 interface UsuarioMe {
   id: number
@@ -50,8 +52,7 @@ export default function ClienteDashboard() {
           return
         }
 
-        // Carrega perfil do paciente
-        const responsePerfil = await fetch("http://localhost:3000/api/v1/me", {
+        const responsePerfil = await fetch(`${API_URL}/api/v1/me`, {
           headers: { Authorization: `Bearer ${token}` },
         })
 
@@ -67,8 +68,7 @@ export default function ClienteDashboard() {
         const dadosPerfil = await responsePerfil.json()
         setPerfilPaciente(dadosPerfil)
 
-        // Carrega consultas do paciente
-        const responseConsultas = await fetch("http://localhost:3000/api/v1/consultas/minhas", {
+        const responseConsultas = await fetch(`${API_URL}/api/v1/consultas/minhas`, {
           headers: { Authorization: `Bearer ${token}` },
         })
 
@@ -86,7 +86,6 @@ export default function ClienteDashboard() {
 
   const hoje = new Date().toISOString().split("T")[0]
 
-  // Próxima consulta: a mais próxima futura com status ativo, ordenada por data asc
   const proximaConsulta = consultas
     .filter((c) => {
       const data = String(c.data_disponivel).split("T")[0]
@@ -102,7 +101,6 @@ export default function ClienteDashboard() {
       return a.horario_inicio.localeCompare(b.horario_inicio)
     })[0] ?? null
 
-  // Consultas em andamento: futuras com status ativo
   const consultasAgendadas = consultas.filter((c) => {
     const data = String(c.data_disponivel).split("T")[0]
     return (
@@ -111,7 +109,6 @@ export default function ClienteDashboard() {
     )
   }).length
 
-  // Consultas realizadas
   const consultasRealizadas = consultas.filter(
     (c) => c.status_consulta === "CONCLUIDA"
   ).length
@@ -155,11 +152,7 @@ export default function ClienteDashboard() {
           <Card className="flex items-center gap-3 p-3 transition-colors hover:bg-accent/50">
             <Avatar className="h-10 w-10">
               <AvatarFallback className="bg-primary/10 text-primary">
-                {perfilPaciente?.nome
-                  ?.split(" ")
-                  .map((n) => n[0])
-                  .join("")
-                  .slice(0, 2)}
+                {perfilPaciente?.nome ? getInitials(perfilPaciente.nome) : ""}
               </AvatarFallback>
             </Avatar>
 
@@ -241,12 +234,7 @@ export default function ClienteDashboard() {
               <div className="flex items-start gap-4">
                 <Avatar className="h-14 w-14">
                   <AvatarFallback className="bg-primary/10 text-primary text-lg">
-                    {proximaConsulta.profissional_nome
-                      .split(" ")
-                      .map((n) => n[0])
-                      .join("")
-                      .slice(0, 2)
-                      .toUpperCase()}
+                    {getInitials(proximaConsulta.profissional_nome)}
                   </AvatarFallback>
                 </Avatar>
 

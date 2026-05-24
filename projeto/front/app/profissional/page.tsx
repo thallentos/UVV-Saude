@@ -10,6 +10,8 @@ import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 
 import { getToken, logout } from "@/lib/auth"
+import { getInitials } from "@/lib/utils"
+import { API_URL } from "@/lib/api"
 
 interface UsuarioMe {
   id: number
@@ -41,7 +43,7 @@ export default function AgendaProfissional() {
           return
         }
 
-        const response = await fetch("http://localhost:3000/api/v1/me", {
+        const response = await fetch(`${API_URL}/api/v1/me`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -59,8 +61,7 @@ export default function AgendaProfissional() {
         const data = await response.json()
         setPerfilProfissional(data)
 
-        // Busca as consultas do profissional
-        const responseConsultas = await fetch("http://localhost:3000/api/v1/consultas/solicitacoes", {
+        const responseConsultas = await fetch(`${API_URL}/api/v1/consultas/solicitacoes`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -69,8 +70,7 @@ export default function AgendaProfissional() {
         if (responseConsultas.ok) {
           const todasConsultas: ConsultaCompleta[] = await responseConsultas.json()
 
-          // Filtra apenas as consultas de hoje
-          const hoje = new Date().toISOString().split("T")[0] // "YYYY-MM-DD"
+          const hoje = new Date().toISOString().split("T")[0]
 
           const deHoje = todasConsultas.filter((c) => {
             const dataConsulta = String(c.data_disponivel).split("T")[0]
@@ -87,11 +87,6 @@ export default function AgendaProfissional() {
     carregarUsuario()
   }, [])
 
-  const getInitials = (name: string) => {
-    return name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()
-  }
-
-  // Totais calculados dinamicamente a partir dos dados reais
   const consultasConfirmadas = consultasHoje.filter(c => c.status_consulta === "CONFIRMADA").length
   const consultasPendentes   = consultasHoje.filter(c => c.status_consulta === "PENDENTE").length
   const solicitacoesPendentes = consultasPendentes
@@ -114,11 +109,7 @@ export default function AgendaProfissional() {
           <Card className="flex items-center gap-3 p-3 transition-colors hover:bg-accent/50">
             <Avatar className="h-10 w-10">
               <AvatarFallback className="bg-primary/10 text-primary">
-                {perfilProfissional?.nome
-                  ?.split(" ")
-                  .slice(0, 2)
-                  .map(n => n[0])
-                  .join("")}
+                {perfilProfissional?.nome ? getInitials(perfilProfissional.nome) : ""}
               </AvatarFallback>
             </Avatar>
 

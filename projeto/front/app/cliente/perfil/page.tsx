@@ -10,9 +10,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Save, Bell, Shield, User, Loader2 } from "lucide-react"
 import { Switch } from "@/components/ui/switch"
 import { getToken, logout } from "@/lib/auth"
+import { getInitials } from "@/lib/utils"
+import { API_URL } from "@/lib/api"
 import { Badge } from "@/components/ui/badge"
-
-const API_URL = "http://localhost:3000"
 
 interface UsuarioMe {
   id: number
@@ -24,10 +24,6 @@ interface UsuarioMe {
   matricula: string | null
   foto_url: string | null
   created_at: string
-}
-
-function getInitials(nome: string): string {
-  return nome.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()
 }
 
 export default function PerfilCliente() {
@@ -172,7 +168,6 @@ export default function PerfilCliente() {
 
         {/* Dados Pessoais */}
         <TabsContent value="pessoal" className="space-y-6">
-          {/* Avatar */}
           <Card>
             <CardContent className="flex items-center gap-6 p-6">
               <Avatar className="h-24 w-24">
@@ -188,7 +183,6 @@ export default function PerfilCliente() {
             </CardContent>
           </Card>
 
-          {/* Formulário */}
           <Card>
             <CardHeader>
               <CardTitle>Informações Pessoais</CardTitle>

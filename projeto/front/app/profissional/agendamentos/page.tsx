@@ -16,6 +16,8 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 
 import { getToken, logout } from "@/lib/auth"
+import { getInitials } from "@/lib/utils"
+import { API_URL } from "@/lib/api"
 
 interface ConsultaCompleta {
   id: number
@@ -48,7 +50,7 @@ export default function AgendamentosProfissionalPage() {
           return
         }
 
-        const response = await fetch("http://localhost:3000/api/v1/consultas/solicitacoes", {
+        const response = await fetch(`${API_URL}/api/v1/consultas/solicitacoes`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -73,7 +75,6 @@ export default function AgendamentosProfissionalPage() {
     carregarConsultas()
   }, [])
 
-  // Divide as consultas em atuais (hoje ou futuras) e passadas
   const hoje = new Date().toISOString().split("T")[0]
 
   const atuais = consultas.filter((c) => {
@@ -99,10 +100,6 @@ export default function AgendamentosProfissionalPage() {
       case "RECUSADA":
         return <Badge className="bg-red-100 text-red-700 hover:bg-red-100">Recusada</Badge>
     }
-  }
-
-  const getInitials = (name: string) => {
-    return name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()
   }
 
   const formatarData = (dataRaw: string) => {
@@ -182,7 +179,6 @@ export default function AgendamentosProfissionalPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-foreground">Agendamentos</h1>
         <p className="text-muted-foreground">
@@ -190,7 +186,6 @@ export default function AgendamentosProfissionalPage() {
         </p>
       </div>
 
-      {/* Tabs */}
       <Tabs defaultValue="atuais" className="space-y-6">
         <TabsList className="grid w-full max-w-md grid-cols-2">
           <TabsTrigger value="atuais">Atuais</TabsTrigger>
@@ -226,7 +221,6 @@ export default function AgendamentosProfissionalPage() {
 
           {selectedConsulta && (
             <div className="space-y-6">
-              {/* Paciente */}
               <div className="flex items-center gap-3">
                 <Avatar className="h-14 w-14">
                   <AvatarFallback className="bg-primary/10 text-primary text-lg">
@@ -243,12 +237,10 @@ export default function AgendamentosProfissionalPage() {
                 </div>
               </div>
 
-              {/* Status */}
               <div className="flex items-center gap-3">
                 {getStatusBadge(selectedConsulta.status_consulta)}
               </div>
 
-              {/* Contato */}
               <div className="space-y-2">
                 <h4 className="text-sm font-medium text-foreground">Contato</h4>
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -257,7 +249,6 @@ export default function AgendamentosProfissionalPage() {
                 </div>
               </div>
 
-              {/* Observações */}
               {selectedConsulta.observacoes && (
                 <div>
                   <h4 className="mb-2 text-sm font-medium text-foreground">Observações</h4>
@@ -267,7 +258,6 @@ export default function AgendamentosProfissionalPage() {
                 </div>
               )}
 
-              {/* Ações */}
               <div className="flex gap-2 pt-2">
                 <Button variant="outline" className="flex-1" onClick={() => setSelectedConsulta(null)}>
                   Fechar
