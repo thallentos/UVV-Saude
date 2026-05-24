@@ -2,16 +2,15 @@
 
 import { useEffect, useState } from "react"
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
-import { Calendar, Clock, MapPin, ArrowRight, CalendarPlus, CalendarCheck, User } from "lucide-react"
+import { Calendar, Clock, ArrowRight, CalendarPlus, CalendarCheck, User } from "lucide-react"
 import Link from "next/link"
 
 import { getToken, logout } from "@/lib/auth"
 
-// Dados do perfil do paciente
 interface UsuarioMe {
   id: number
   nome: string
@@ -20,23 +19,29 @@ interface UsuarioMe {
   tipo_usuario: string
 }
 
-const proximaConsulta = {
-  profissional: "Dra. Ana Costa",
-  especialidade: "Nutricionista",
-  data: "15 de Abril, 2026",
-  horario: "14:00",
-  local: "Sala 205 - Bloco B",
-  avatar: "/placeholder-user.jpg",
+interface ConsultaCompleta {
+  id: number
+  paciente_id: number
+  paciente_nome: string
+  paciente_email: string
+  agenda_id: number
+  data_disponivel: string
+  horario_inicio: string
+  profissional_id: number
+  profissional_nome: string
+  especialidade_nome: string
+  status_consulta: "PENDENTE" | "CONFIRMADA" | "RECUSADA" | "CANCELADA" | "CONCLUIDA"
+  observacoes: string | null
+  created_at: string
+  updated_at: string
 }
-
-const consultasAgendadas = 2
-const consultasRealizadas = 8
 
 export default function ClienteDashboard() {
   const [perfilPaciente, setPerfilPaciente] = useState<UsuarioMe | null>(null)
+  const [consultas, setConsultas] = useState<ConsultaCompleta[]>([])
 
   useEffect(() => {
-    async function carregarUsuario() {
+    async function carregarDados() {
       try {
         const token = getToken()
 
@@ -45,31 +50,92 @@ export default function ClienteDashboard() {
           return
         }
 
-        const response = await fetch("http://localhost:3000/api/v1/me", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+        // Carrega perfil do paciente
+        const responsePerfil = await fetch("http://localhost:3000/api/v1/me", {
+          headers: { Authorization: `Bearer ${token}` },
         })
 
-        if (response.status === 401) {
+        if (responsePerfil.status === 401) {
           logout()
           return
         }
 
-        if (!response.ok) {
+        if (!responsePerfil.ok) {
           throw new Error("Erro ao carregar usuário")
         }
 
-        const data = await response.json()
+        const dadosPerfil = await responsePerfil.json()
+        setPerfilPaciente(dadosPerfil)
 
-        setPerfilPaciente(data)
+        // Carrega consultas do paciente
+        const responseConsultas = await fetch("http://localhost:3000/api/v1/consultas/minhas", {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+
+        if (responseConsultas.ok) {
+          const dadosConsultas: ConsultaCompleta[] = await responseConsultas.json()
+          setConsultas(dadosConsultas)
+        }
       } catch (error) {
-        console.error("Erro ao buscar usuário:", error)
+        console.error("Erro ao carregar dados:", error)
       }
     }
 
-    carregarUsuario()
+    carregarDados()
   }, [])
+
+  const hoje = new Date().toISOString().split("T")[0]
+
+  // Próxima consulta: a mais próxima futura com status ativo, ordenada por data asc
+  const proximaConsulta = consultas
+    .filter((c) => {
+      const data = String(c.data_disponivel).split("T")[0]
+      return (
+        data >= hoje &&
+        (c.status_consulta === "PENDENTE" || c.status_consulta === "CONFIRMADA")
+      )
+    })
+    .sort((a, b) => {
+      const dataA = String(a.data_disponivel).split("T")[0]
+      const dataB = String(b.data_disponivel).split("T")[0]
+      if (dataA !== dataB) return dataA.localeCompare(dataB)
+      return a.horario_inicio.localeCompare(b.horario_inicio)
+    })[0] ?? null
+
+  // Consultas em andamento: futuras com status ativo
+  const consultasAgendadas = consultas.filter((c) => {
+    const data = String(c.data_disponivel).split("T")[0]
+    return (
+      data >= hoje &&
+      (c.status_consulta === "PENDENTE" || c.status_consulta === "CONFIRMADA")
+    )
+  }).length
+
+  // Consultas realizadas
+  const consultasRealizadas = consultas.filter(
+    (c) => c.status_consulta === "CONCLUIDA"
+  ).length
+
+  const formatarData = (dataRaw: string) => {
+    const data = new Date(dataRaw)
+    return data.toLocaleDateString("pt-BR", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+      timeZone: "UTC",
+    })
+  }
+
+  const getStatusBadge = (status: ConsultaCompleta["status_consulta"]) => {
+    switch (status) {
+      case "CONFIRMADA":
+        return <Badge className="bg-green-100 text-green-700">Confirmada</Badge>
+      case "PENDENTE":
+        return <Badge className="bg-yellow-100 text-yellow-700">Pendente</Badge>
+      default:
+        return null
+    }
+  }
 
   return (
     <div className="space-y-8">
@@ -81,7 +147,7 @@ export default function ClienteDashboard() {
           </h1>
 
           <p className="mt-1 text-muted-foreground">
-            Bem-vinda ao seu portal de saúde.
+            Bem-vindo ao seu portal de saúde.
           </p>
         </div>
 
@@ -120,13 +186,8 @@ export default function ClienteDashboard() {
               </div>
 
               <div>
-                <h3 className="font-semibold text-foreground">
-                  Criar Consulta
-                </h3>
-
-                <p className="text-sm text-muted-foreground">
-                  Agendar novo atendimento
-                </p>
+                <h3 className="font-semibold text-foreground">Criar Consulta</h3>
+                <p className="text-sm text-muted-foreground">Agendar novo atendimento</p>
               </div>
             </CardContent>
           </Card>
@@ -140,10 +201,7 @@ export default function ClienteDashboard() {
               </div>
 
               <div>
-                <h3 className="font-semibold text-foreground">
-                  Agendamentos
-                </h3>
-
+                <h3 className="font-semibold text-foreground">Agendamentos</h3>
                 <p className="text-sm text-muted-foreground">
                   {consultasAgendadas} em andamento
                 </p>
@@ -160,13 +218,8 @@ export default function ClienteDashboard() {
               </div>
 
               <div>
-                <h3 className="font-semibold text-foreground">
-                  Meu Perfil
-                </h3>
-
-                <p className="text-sm text-muted-foreground">
-                  Dados pessoais
-                </p>
+                <h3 className="font-semibold text-foreground">Meu Perfil</h3>
+                <p className="text-sm text-muted-foreground">Dados pessoais</p>
               </div>
             </CardContent>
           </Card>
@@ -183,63 +236,57 @@ export default function ClienteDashboard() {
         </CardHeader>
 
         <CardContent className="space-y-4">
-          <div className="flex items-start gap-4">
-            <Avatar className="h-14 w-14">
-              <AvatarImage
-                src={proximaConsulta.avatar}
-                alt={proximaConsulta.profissional}
-              />
+          {proximaConsulta ? (
+            <>
+              <div className="flex items-start gap-4">
+                <Avatar className="h-14 w-14">
+                  <AvatarFallback className="bg-primary/10 text-primary text-lg">
+                    {proximaConsulta.profissional_nome
+                      .split(" ")
+                      .map((n) => n[0])
+                      .join("")
+                      .slice(0, 2)
+                      .toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
 
-              <AvatarFallback className="bg-primary/10 text-primary text-lg">
-                AC
-              </AvatarFallback>
-            </Avatar>
+                <div className="flex-1">
+                  <h3 className="font-semibold text-foreground">
+                    {proximaConsulta.profissional_nome}
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    {proximaConsulta.especialidade_nome}
+                  </p>
+                </div>
 
-            <div className="flex-1">
-              <h3 className="font-semibold text-foreground">
-                {proximaConsulta.profissional}
-              </h3>
+                {getStatusBadge(proximaConsulta.status_consulta)}
+              </div>
 
-              <p className="text-sm text-muted-foreground">
-                {proximaConsulta.especialidade}
-              </p>
-            </div>
+              <div className="grid gap-2 rounded-lg bg-muted/50 p-3 sm:grid-cols-2">
+                <div className="flex items-center gap-2 text-sm">
+                  <Calendar className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-foreground">
+                    {formatarData(proximaConsulta.data_disponivel)}
+                  </span>
+                </div>
 
-            <Badge className="bg-green-100 text-green-700">
-              Confirmada
-            </Badge>
-          </div>
-
-          <div className="grid gap-2 rounded-lg bg-muted/50 p-3 sm:grid-cols-3">
-            <div className="flex items-center gap-2 text-sm">
-              <Calendar className="h-4 w-4 text-muted-foreground" />
-
-              <span className="text-foreground">
-                {proximaConsulta.data}
-              </span>
-            </div>
-
-            <div className="flex items-center gap-2 text-sm">
-              <Clock className="h-4 w-4 text-muted-foreground" />
-
-              <span className="text-foreground">
-                {proximaConsulta.horario}
-              </span>
-            </div>
-
-            <div className="flex items-center gap-2 text-sm">
-              <MapPin className="h-4 w-4 text-muted-foreground" />
-
-              <span className="text-foreground">
-                {proximaConsulta.local}
-              </span>
-            </div>
-          </div>
+                <div className="flex items-center gap-2 text-sm">
+                  <Clock className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-foreground">
+                    {proximaConsulta.horario_inicio}
+                  </span>
+                </div>
+              </div>
+            </>
+          ) : (
+            <p className="py-4 text-center text-sm text-muted-foreground">
+              Você não possui consultas agendadas.
+            </p>
+          )}
 
           <Button variant="outline" className="w-full" asChild>
             <Link href="/cliente/agendamentos">
               Ver todos os agendamentos
-
               <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
           </Button>
@@ -258,10 +305,7 @@ export default function ClienteDashboard() {
               <p className="text-2xl font-bold text-foreground">
                 {consultasAgendadas}
               </p>
-
-              <p className="text-sm text-muted-foreground">
-                Consultas em andamento
-              </p>
+              <p className="text-sm text-muted-foreground">Consultas em andamento</p>
             </div>
           </CardContent>
         </Card>
@@ -276,10 +320,7 @@ export default function ClienteDashboard() {
               <p className="text-2xl font-bold text-foreground">
                 {consultasRealizadas}
               </p>
-
-              <p className="text-sm text-muted-foreground">
-                Consultas realizadas
-              </p>
+              <p className="text-sm text-muted-foreground">Consultas realizadas</p>
             </div>
           </CardContent>
         </Card>
