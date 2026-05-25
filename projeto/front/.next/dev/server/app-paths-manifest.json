@@ -1,3 +1,11 @@
 {
-  "/profissional/agendamentos/page": "app/profissional/agendamentos/page.js"
+  "/cliente/agendamentos/page": "app/cliente/agendamentos/page.js",
+  "/cliente/agendar/page": "app/cliente/agendar/page.js",
+  "/cliente/page": "app/cliente/page.js",
+  "/login/page": "app/login/page.js",
+  "/page": "app/page.js",
+  "/profissional/agendamentos/page": "app/profissional/agendamentos/page.js",
+  "/profissional/horarios/page": "app/profissional/horarios/page.js",
+  "/profissional/page": "app/profissional/page.js",
+  "/profissional/solicitacoes/page": "app/profissional/solicitacoes/page.js"
 }

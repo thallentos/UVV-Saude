@@ -258,17 +258,21 @@
     --color-red-100: #ffe2e2;
     --color-red-300: #ffa3a3;
     --color-red-400: #ff6568;
+    --color-red-500: #fb2c36;
     --color-red-600: #e40014;
     --color-red-700: #bf000f;
     --color-yellow-100: #fef9c2;
+    --color-yellow-600: #cd8900;
     --color-yellow-700: #a36100;
     --color-green-100: #dcfce7;
     --color-green-500: #00c758;
     --color-green-600: #00a544;
     --color-green-700: #008138;
     --color-blue-100: #dbeafe;
+    --color-blue-600: #155dfc;
     --color-blue-700: #1447e6;
     --color-gray-100: #f3f4f6;
+    --color-gray-500: #6a7282;
     --color-gray-700: #364153;
     --color-black: #000;
     --color-white: #fff;
@@ -327,17 +331,21 @@
       --color-red-100: lab(92.243% 10.2865 3.83865);
       --color-red-300: lab(76.5514% 36.4219 15.5335);
       --color-red-400: lab(63.7053% 60.7449 31.3109);
+      --color-red-500: lab(55.4814% 75.0732 48.8528);
       --color-red-600: lab(48.4493% 77.4328 61.5452);
       --color-red-700: lab(40.4273% 67.2623 53.7441);
       --color-yellow-100: lab(97.3564% -4.51407 27.344);
+      --color-yellow-600: lab(62.7799% 22.4198 86.1544);
       --color-yellow-700: lab(47.8202% 25.2426 66.5015);
       --color-green-100: lab(96.186% -13.8464 6.52362);
       --color-green-500: lab(70.5521% -66.5147 45.8072);
       --color-green-600: lab(59.0978% -58.6621 41.2579);
       --color-green-700: lab(47.0329% -47.0239 31.4788);
       --color-blue-100: lab(92.0301% -2.24757 -11.6453);
+      --color-blue-600: lab(44.0605% 29.0279 -86.0352);
       --color-blue-700: lab(36.9089% 35.0961 -85.6872);
       --color-gray-100: lab(96.1596% -.082314 -1.13575);
+      --color-gray-500: lab(47.7841% -.393212 -10.0268);
       --color-gray-700: lab(27.1134% -.956401 -12.3224);
     }
   }
@@ -2549,6 +2557,10 @@
     color: var(--background);
   }
 
+  .text-blue-600 {
+    color: var(--color-blue-600);
+  }
+
   .text-blue-700 {
     color: var(--color-blue-700);
   }
@@ -2581,6 +2593,10 @@
     .text-foreground\/50 {
       color: color-mix(in oklab, var(--foreground) 50%, transparent);
     }
+  }
+
+  .text-gray-500 {
+    color: var(--color-gray-500);
   }
 
   .text-gray-700 {
@@ -2631,6 +2647,10 @@
     color: var(--primary-foreground);
   }
 
+  .text-red-500 {
+    color: var(--color-red-500);
+  }
+
   .text-red-700 {
     color: var(--color-red-700);
   }
@@ -2655,6 +2675,10 @@
 
   .text-white {
     color: var(--color-white);
+  }
+
+  .text-yellow-600 {
+    color: var(--color-yellow-600);
   }
 
   .text-yellow-700 {

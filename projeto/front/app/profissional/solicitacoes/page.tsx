@@ -60,6 +60,15 @@ function getStatusBadge(status: string) {
   }
 }
 
+// Ordena um array de consultas por data + horário, mais recentes primeiro
+function ordenarPorDataDesc(lista: Consulta[]): Consulta[] {
+  return [...lista].sort((a, b) => {
+    const dataA = `${String(a.data_disponivel).split("T")[0]}T${a.horario_inicio}`
+    const dataB = `${String(b.data_disponivel).split("T")[0]}T${b.horario_inicio}`
+    return dataB.localeCompare(dataA)
+  })
+}
+
 export default function SolicitacoesPage() {
   const [consultas, setConsultas] = useState<Consulta[]>([])
   const [carregando, setCarregando] = useState(true)
@@ -139,15 +148,73 @@ export default function SolicitacoesPage() {
     }
   }
 
-  const pendentes = consultas.filter(c =>
-    c.status_consulta === "PENDENTE" &&
+  const consultasFiltradas = consultas.filter(c =>
     c.paciente_nome.toLowerCase().includes(busca.toLowerCase())
   )
 
-  const processadas = consultas.filter(c =>
-    c.status_consulta !== "PENDENTE" &&
-    c.paciente_nome.toLowerCase().includes(busca.toLowerCase())
+  const pendentes = consultasFiltradas.filter(c => c.status_consulta === "PENDENTE")
+
+  // Cada grupo de processadas já sai ordenado por data desc
+  const confirmadas = ordenarPorDataDesc(
+    consultasFiltradas.filter(c => c.status_consulta === "CONFIRMADA")
   )
+  const canceladas = ordenarPorDataDesc(
+    consultasFiltradas.filter(c => c.status_consulta === "CANCELADA")
+  )
+  const recusadas = ordenarPorDataDesc(
+    consultasFiltradas.filter(c => c.status_consulta === "RECUSADA")
+  )
+
+  const totalProcessadas = confirmadas.length + canceladas.length + recusadas.length
+
+  // Card reutilizável para as seções de processadas
+  function CardConsultaProcessada({ consulta }: { consulta: Consulta }) {
+    return (
+      <Card
+        className={
+          consulta.status_consulta === "RECUSADA" ||
+          consulta.status_consulta === "CANCELADA"
+            ? "opacity-60"
+            : ""
+        }
+      >
+        <CardContent className="p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Avatar className="h-12 w-12">
+                <AvatarFallback className="bg-primary/10 text-primary">
+                  {getInitials(consulta.paciente_nome)}
+                </AvatarFallback>
+              </Avatar>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h3 className="font-semibold text-foreground">{consulta.paciente_nome}</h3>
+                  {getStatusBadge(consulta.status_consulta)}
+                </div>
+                <div className="mt-1 flex flex-wrap gap-3 text-sm text-muted-foreground">
+                  <span className="flex items-center gap-1">
+                    <Calendar className="h-3.5 w-3.5" />
+                    {formatarData(consulta.data_disponivel)}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Clock className="h-3.5 w-3.5" />
+                    {consulta.horario_inicio.slice(0, 5)}
+                  </span>
+                </div>
+              </div>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => { setSelecionada(consulta); setDialogDetalhes(true) }}
+            >
+              Detalhes
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
 
   return (
     <div className="space-y-6">
@@ -226,11 +293,11 @@ export default function SolicitacoesPage() {
               Pendentes ({pendentes.length})
             </TabsTrigger>
             <TabsTrigger value="processadas">
-              Processadas ({processadas.length})
+              Processadas ({totalProcessadas})
             </TabsTrigger>
           </TabsList>
 
-          {/* Pendentes */}
+          {/* Pendentes — sem alteração */}
           <TabsContent value="pendentes" className="mt-4 space-y-3">
             {carregando ? (
               <div className="flex h-48 items-center justify-center">
@@ -310,9 +377,9 @@ export default function SolicitacoesPage() {
             )}
           </TabsContent>
 
-          {/* Processadas */}
-          <TabsContent value="processadas" className="mt-4 space-y-3">
-            {processadas.length === 0 ? (
+          {/* Processadas — ordenadas por data desc e separadas por status */}
+          <TabsContent value="processadas" className="mt-4 space-y-6">
+            {totalProcessadas === 0 ? (
               <Card>
                 <CardContent className="flex flex-col items-center justify-center py-12">
                   <FileText className="h-10 w-10 text-muted-foreground/50" />
@@ -320,52 +387,52 @@ export default function SolicitacoesPage() {
                 </CardContent>
               </Card>
             ) : (
-              processadas.map(consulta => (
-                <Card
-                  key={consulta.id}
-                  className={
-                    consulta.status_consulta === "RECUSADA" ||
-                    consulta.status_consulta === "CANCELADA"
-                      ? "opacity-60"
-                      : ""
-                  }
-                >
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <Avatar className="h-12 w-12">
-                          <AvatarFallback className="bg-primary/10 text-primary">
-                            {getInitials(consulta.paciente_nome)}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <h3 className="font-semibold text-foreground">{consulta.paciente_nome}</h3>
-                            {getStatusBadge(consulta.status_consulta)}
-                          </div>
-                          <div className="mt-1 flex flex-wrap gap-3 text-sm text-muted-foreground">
-                            <span className="flex items-center gap-1">
-                              <Calendar className="h-3.5 w-3.5" />
-                              {formatarData(consulta.data_disponivel)}
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <Clock className="h-3.5 w-3.5" />
-                              {consulta.horario_inicio.slice(0, 5)}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => { setSelecionada(consulta); setDialogDetalhes(true) }}
-                      >
-                        Detalhes
-                      </Button>
+              <>
+                {/* Confirmadas */}
+                {confirmadas.length > 0 && (
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      <Check className="h-4 w-4 text-green-600" />
+                      <h2 className="text-sm font-semibold text-foreground">
+                        Confirmadas ({confirmadas.length})
+                      </h2>
                     </div>
-                  </CardContent>
-                </Card>
-              ))
+                    {confirmadas.map(consulta => (
+                      <CardConsultaProcessada key={consulta.id} consulta={consulta} />
+                    ))}
+                  </div>
+                )}
+
+                {/* Canceladas */}
+                {canceladas.length > 0 && (
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      <X className="h-4 w-4 text-gray-500" />
+                      <h2 className="text-sm font-semibold text-foreground">
+                        Canceladas ({canceladas.length})
+                      </h2>
+                    </div>
+                    {canceladas.map(consulta => (
+                      <CardConsultaProcessada key={consulta.id} consulta={consulta} />
+                    ))}
+                  </div>
+                )}
+
+                {/* Recusadas */}
+                {recusadas.length > 0 && (
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      <X className="h-4 w-4 text-red-500" />
+                      <h2 className="text-sm font-semibold text-foreground">
+                        Recusadas ({recusadas.length})
+                      </h2>
+                    </div>
+                    {recusadas.map(consulta => (
+                      <CardConsultaProcessada key={consulta.id} consulta={consulta} />
+                    ))}
+                  </div>
+                )}
+              </>
             )}
           </TabsContent>
         </Tabs>

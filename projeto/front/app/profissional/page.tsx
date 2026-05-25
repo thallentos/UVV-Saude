@@ -70,11 +70,22 @@ export default function AgendaProfissional() {
         if (responseConsultas.ok) {
           const todasConsultas: ConsultaCompleta[] = await responseConsultas.json()
 
-          const hoje = new Date().toISOString().split("T")[0]
+          // Gera o "hoje" no fuso local do navegador.
+          // new Date().toISOString() retorna UTC, o que em horário de Brasília (UTC-3)
+          // às 23h já viraria o dia seguinte — causando o bug de datas erradas.
+          const agora = new Date()
+          const hoje = `${agora.getFullYear()}-${String(agora.getMonth() + 1).padStart(2, "0")}-${String(agora.getDate()).padStart(2, "0")}`
 
           const deHoje = todasConsultas.filter((c) => {
+            // data_disponivel pode vir como "2026-05-24T03:00:00.000Z" ou "2026-05-24",
+            // pegamos só a parte da data (antes do "T") para comparar
             const dataConsulta = String(c.data_disponivel).split("T")[0]
-            return dataConsulta === hoje
+
+            // Exclui RECUSADA e CANCELADA — não há atendimento nesses casos
+            const statusAtivo =
+              c.status_consulta !== "RECUSADA" && c.status_consulta !== "CANCELADA"
+
+            return dataConsulta === hoje && statusAtivo
           })
 
           setConsultasHoje(deHoje)
@@ -218,60 +229,75 @@ export default function AgendaProfissional() {
       </div>
 
       {/* Resumo do Dia */}
-      <div className="grid gap-4 sm:grid-cols-3">
-        <Card>
-          <CardContent className="flex items-center gap-4 p-5">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-green-100">
-              <Clock className="h-6 w-6 text-green-700" />
-            </div>
+      {/* Resumo do Dia */}
+      <div className="space-y-3">
+        <div>
+          <h2 className="text-lg font-semibold text-foreground">Resumo de Hoje</h2>
+          <p className="text-sm text-muted-foreground">
+            {new Date().toLocaleDateString("pt-BR", {
+              weekday: "long",
+              day: "2-digit",
+              month: "long",
+              year: "numeric",
+            })}
+          </p>
+        </div>
 
-            <div>
-              <p className="text-2xl font-bold text-foreground">
-                {consultasConfirmadas}
-              </p>
+        <div className="grid gap-4 sm:grid-cols-3">
+          <Card>
+            <CardContent className="flex items-center gap-4 p-5">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-green-100">
+                <Clock className="h-6 w-6 text-green-700" />
+              </div>
 
-              <p className="text-sm text-muted-foreground">
-                Confirmadas
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+              <div>
+                <p className="text-2xl font-bold text-foreground">
+                  {consultasConfirmadas}
+                </p>
 
-        <Card>
-          <CardContent className="flex items-center gap-4 p-5">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-yellow-100">
-              <Clock className="h-6 w-6 text-yellow-700" />
-            </div>
+                <p className="text-sm text-muted-foreground">
+                  Confirmadas
+                </p>
+              </div>
+            </CardContent>
+          </Card>
 
-            <div>
-              <p className="text-2xl font-bold text-foreground">
-                {consultasPendentes}
-              </p>
+          <Card>
+            <CardContent className="flex items-center gap-4 p-5">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-yellow-100">
+                <Clock className="h-6 w-6 text-yellow-700" />
+              </div>
 
-              <p className="text-sm text-muted-foreground">
-                Pendentes
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+              <div>
+                <p className="text-2xl font-bold text-foreground">
+                  {consultasPendentes}
+                </p>
 
-        <Card>
-          <CardContent className="flex items-center gap-4 p-5">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
-              <CalendarDays className="h-6 w-6 text-primary" />
-            </div>
+                <p className="text-sm text-muted-foreground">
+                  Pendentes
+                </p>
+              </div>
+            </CardContent>
+          </Card>
 
-            <div>
-              <p className="text-2xl font-bold text-foreground">
-                {consultasHoje.length}
-              </p>
+          <Card>
+            <CardContent className="flex items-center gap-4 p-5">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
+                <CalendarDays className="h-6 w-6 text-primary" />
+              </div>
 
-              <p className="text-sm text-muted-foreground">
-                Total hoje
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+              <div>
+                <p className="text-2xl font-bold text-foreground">
+                  {consultasHoje.length}
+                </p>
+
+                <p className="text-sm text-muted-foreground">
+                  Total hoje
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
 
       {/* Consultas do Dia */}
@@ -307,7 +333,8 @@ export default function AgendaProfissional() {
                 >
                   <div className="flex h-12 w-16 items-center justify-center rounded-lg bg-primary/10">
                     <span className="text-sm font-semibold text-primary">
-                      {apt.horario_inicio}
+                      {/* Exibe apenas HH:MM, cortando os segundos caso venham do banco */}
+                      {apt.horario_inicio.slice(0, 5)}
                     </span>
                   </div>
 
