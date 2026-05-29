@@ -1,19 +1,22 @@
 import type { Metadata, Viewport } from "next"
-import { Inter, DM_Sans } from "next/font/google"
+import { Poppins } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
 
-const _inter = Inter({ subsets: ["latin"], variable: "--font-inter" })
-const _dmSans = DM_Sans({
+const poppins = Poppins({
   subsets: ["latin"],
-  variable: "--font-dm-sans",
-  weight: ["400", "500", "600", "700"],
+  weight: ["300", "400", "500", "600", "700"],
 })
 
 export const metadata: Metadata = {
   title: "UVV Saúde - Gestao de Saude Inteligente",
   description:
     "Plataforma completa para profissionais de saude e seus pacientes. Agenda, prontuario, faturamento e muito mais.",
+  icons: {
+    icon: "/logouvv.png",
+    shortcut: "/logouvv.png",
+    apple: "/logouvv.png",
+  },
 }
 
 export const viewport: Viewport = {
@@ -29,7 +32,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR">
-      <body className="font-sans antialiased">
+      <body className={poppins.className}>
         {children}
         <Analytics />
       </body>

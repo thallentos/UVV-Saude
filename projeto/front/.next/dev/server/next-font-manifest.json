@@ -1,44 +1,81 @@
 {
   "app": {
     "[project]/projeto/front/app/cliente/agendamentos/page": [
-      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
-      "static/media/5c285b27cdda1fe8-s.p.a62025f2.woff2"
+      "static/media/c875c6f5d3e977ac-s.p.0g_ng0t~d_b9n.woff2",
+      "static/media/a218039a3287bcfd-s.p.17-1enzs_j91b.woff2",
+      "static/media/8e6fa89aa22d24ec-s.p.0uvzar8hswo3p.woff2",
+      "static/media/e2334d715941921e-s.p.12skym0rqknxy.woff2",
+      "static/media/47fe1b7cd6e6ed85-s.p.0~mcdl10zdfb3.woff2"
     ],
     "[project]/projeto/front/app/cliente/agendar/page": [
-      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
-      "static/media/5c285b27cdda1fe8-s.p.a62025f2.woff2"
+      "static/media/c875c6f5d3e977ac-s.p.0g_ng0t~d_b9n.woff2",
+      "static/media/a218039a3287bcfd-s.p.17-1enzs_j91b.woff2",
+      "static/media/8e6fa89aa22d24ec-s.p.0uvzar8hswo3p.woff2",
+      "static/media/e2334d715941921e-s.p.12skym0rqknxy.woff2",
+      "static/media/47fe1b7cd6e6ed85-s.p.0~mcdl10zdfb3.woff2"
     ],
     "[project]/projeto/front/app/cliente/page": [
-      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
-      "static/media/5c285b27cdda1fe8-s.p.a62025f2.woff2"
+      "static/media/c875c6f5d3e977ac-s.p.0g_ng0t~d_b9n.woff2",
+      "static/media/a218039a3287bcfd-s.p.17-1enzs_j91b.woff2",
+      "static/media/8e6fa89aa22d24ec-s.p.0uvzar8hswo3p.woff2",
+      "static/media/e2334d715941921e-s.p.12skym0rqknxy.woff2",
+      "static/media/47fe1b7cd6e6ed85-s.p.0~mcdl10zdfb3.woff2"
+    ],
+    "[project]/projeto/front/app/cliente/perfil/page": [
+      "static/media/c875c6f5d3e977ac-s.p.0g_ng0t~d_b9n.woff2",
+      "static/media/a218039a3287bcfd-s.p.17-1enzs_j91b.woff2",
+      "static/media/8e6fa89aa22d24ec-s.p.0uvzar8hswo3p.woff2",
+      "static/media/e2334d715941921e-s.p.12skym0rqknxy.woff2",
+      "static/media/47fe1b7cd6e6ed85-s.p.0~mcdl10zdfb3.woff2"
     ],
     "[project]/projeto/front/app/login/page": [
-      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
-      "static/media/5c285b27cdda1fe8-s.p.a62025f2.woff2"
+      "static/media/c875c6f5d3e977ac-s.p.0g_ng0t~d_b9n.woff2",
+      "static/media/a218039a3287bcfd-s.p.17-1enzs_j91b.woff2",
+      "static/media/8e6fa89aa22d24ec-s.p.0uvzar8hswo3p.woff2",
+      "static/media/e2334d715941921e-s.p.12skym0rqknxy.woff2",
+      "static/media/47fe1b7cd6e6ed85-s.p.0~mcdl10zdfb3.woff2"
     ],
     "[project]/projeto/front/app/page": [
-      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
-      "static/media/5c285b27cdda1fe8-s.p.a62025f2.woff2"
+      "static/media/c875c6f5d3e977ac-s.p.0g_ng0t~d_b9n.woff2",
+      "static/media/a218039a3287bcfd-s.p.17-1enzs_j91b.woff2",
+      "static/media/8e6fa89aa22d24ec-s.p.0uvzar8hswo3p.woff2",
+      "static/media/e2334d715941921e-s.p.12skym0rqknxy.woff2",
+      "static/media/47fe1b7cd6e6ed85-s.p.0~mcdl10zdfb3.woff2"
     ],
     "[project]/projeto/front/app/profissional/agendamentos/page": [
-      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
-      "static/media/5c285b27cdda1fe8-s.p.a62025f2.woff2"
+      "static/media/c875c6f5d3e977ac-s.p.0g_ng0t~d_b9n.woff2",
+      "static/media/a218039a3287bcfd-s.p.17-1enzs_j91b.woff2",
+      "static/media/8e6fa89aa22d24ec-s.p.0uvzar8hswo3p.woff2",
+      "static/media/e2334d715941921e-s.p.12skym0rqknxy.woff2",
+      "static/media/47fe1b7cd6e6ed85-s.p.0~mcdl10zdfb3.woff2"
     ],
     "[project]/projeto/front/app/profissional/horarios/page": [
-      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
-      "static/media/5c285b27cdda1fe8-s.p.a62025f2.woff2"
+      "static/media/c875c6f5d3e977ac-s.p.0g_ng0t~d_b9n.woff2",
+      "static/media/a218039a3287bcfd-s.p.17-1enzs_j91b.woff2",
+      "static/media/8e6fa89aa22d24ec-s.p.0uvzar8hswo3p.woff2",
+      "static/media/e2334d715941921e-s.p.12skym0rqknxy.woff2",
+      "static/media/47fe1b7cd6e6ed85-s.p.0~mcdl10zdfb3.woff2"
     ],
     "[project]/projeto/front/app/profissional/page": [
-      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
-      "static/media/5c285b27cdda1fe8-s.p.a62025f2.woff2"
+      "static/media/c875c6f5d3e977ac-s.p.0g_ng0t~d_b9n.woff2",
+      "static/media/a218039a3287bcfd-s.p.17-1enzs_j91b.woff2",
+      "static/media/8e6fa89aa22d24ec-s.p.0uvzar8hswo3p.woff2",
+      "static/media/e2334d715941921e-s.p.12skym0rqknxy.woff2",
+      "static/media/47fe1b7cd6e6ed85-s.p.0~mcdl10zdfb3.woff2"
     ],
     "[project]/projeto/front/app/profissional/perfil/page": [
-      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
-      "static/media/5c285b27cdda1fe8-s.p.a62025f2.woff2"
+      "static/media/c875c6f5d3e977ac-s.p.0g_ng0t~d_b9n.woff2",
+      "static/media/a218039a3287bcfd-s.p.17-1enzs_j91b.woff2",
+      "static/media/8e6fa89aa22d24ec-s.p.0uvzar8hswo3p.woff2",
+      "static/media/e2334d715941921e-s.p.12skym0rqknxy.woff2",
+      "static/media/47fe1b7cd6e6ed85-s.p.0~mcdl10zdfb3.woff2"
     ],
     "[project]/projeto/front/app/profissional/solicitacoes/page": [
-      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
-      "static/media/5c285b27cdda1fe8-s.p.a62025f2.woff2"
+      "static/media/c875c6f5d3e977ac-s.p.0g_ng0t~d_b9n.woff2",
+      "static/media/a218039a3287bcfd-s.p.17-1enzs_j91b.woff2",
+      "static/media/8e6fa89aa22d24ec-s.p.0uvzar8hswo3p.woff2",
+      "static/media/e2334d715941921e-s.p.12skym0rqknxy.woff2",
+      "static/media/47fe1b7cd6e6ed85-s.p.0~mcdl10zdfb3.woff2"
     ]
   },
   "appUsingSizeAdjust": true,

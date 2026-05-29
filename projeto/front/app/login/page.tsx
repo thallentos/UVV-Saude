@@ -2,8 +2,9 @@
 
 import { useState } from "react"
 import Link from "next/link"
+import Image from "next/image"
 import { useRouter } from "next/navigation"
-import { Heart, Eye, EyeOff } from "lucide-react"
+import { Eye, EyeOff } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -62,12 +63,21 @@ export default function LoginPage() {
     <div className="flex min-h-screen flex-col bg-background">
       <header className="border-b border-border bg-card">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary">
-              <Heart className="h-5 w-5 text-primary-foreground" />
-            </div>
-            <span className="text-lg font-bold text-foreground">UVV Health</span>
+          <Link href="/" className="flex items-center gap-3">
+            <Image
+              src="/logouvv.png"
+              alt="UVV Saúde"
+              width={300}
+              height={120}
+              className="h-auto w-auto max-h-10 max-w-[140px] object-contain"
+              priority
+            />
+
+            <span className="text-lg font-bold text-foreground">
+              UVV Saúde
+            </span>
           </Link>
+
           <Link href="/cadastro" className="text-sm text-muted-foreground hover:text-primary">
             Criar conta
           </Link>
@@ -80,6 +90,7 @@ export default function LoginPage() {
             <CardTitle className="text-2xl">Entrar</CardTitle>
             <CardDescription>Acesse sua conta para continuar</CardDescription>
           </CardHeader>
+
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-5">
               <div className="space-y-2">
@@ -93,6 +104,7 @@ export default function LoginPage() {
                   required
                 />
               </div>
+
               <div className="space-y-2">
                 <Label htmlFor="senha">Senha</Label>
                 <div className="relative">
@@ -104,6 +116,7 @@ export default function LoginPage() {
                     onChange={e => setFormData({ ...formData, senha: e.target.value })}
                     required
                   />
+
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}

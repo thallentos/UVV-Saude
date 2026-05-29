@@ -3,26 +3,27 @@
   "middleware": {
     "/": {
       "files": [
-        "server/edge/chunks/f33f0_next_dist_9c8155d7._.js",
-        "server/edge/chunks/[root-of-the-server]__ab6f583a._.js",
-        "server/edge/chunks/a7488_next_dist_esm_build_templates_edge-wrapper_73e4118b.js"
+        "server/edge/chunks/03cf_next_dist_009~g6c._.js",
+        "server/edge/chunks/[root-of-the-server]__0ti3r3~._.js",
+        "server/edge/chunks/0q6j_next_dist_esm_build_templates_edge-wrapper_0zydvy5.js"
       ],
       "name": "middleware",
       "page": "/",
+      "entrypoint": "server/edge/chunks/0q6j_next_dist_esm_build_templates_edge-wrapper_0zydvy5.js",
       "matchers": [
         {
-          "regexp": "^(?:\\/(_next\\/data\\/[^/]{1,}))?(?:\\/((?!_next\\/static|_next\\/image|favicon.ico|public).*))(\\\\.json)?[\\/#\\?]?$",
-          "originalSource": "/((?!_next/static|_next/image|favicon.ico|public).*)"
+          "regexp": "^(?:\\/(_next\\/data\\/[^/]{1,}))?(?:\\/((?!_next\\/static|_next\\/image|favicon.ico|.*\\.(?:png|jpg|jpeg|gif|svg|webp|ico)$).*))(\\.json|\\.rsc|\\.segments\\/.+\\.segment\\.rsc)?[\\/#\\?]?$",
+          "originalSource": "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:png|jpg|jpeg|gif|svg|webp|ico)$).*)"
         }
       ],
       "wasm": [],
       "assets": [],
       "env": {
         "__NEXT_BUILD_ID": "development",
-        "NEXT_SERVER_ACTIONS_ENCRYPTION_KEY": "ADTYWrisECUevxaLvEW65z2fkPtZJoVDyHUtvOe3zO0=",
-        "__NEXT_PREVIEW_MODE_ID": "75f1d946262b641770c629e595d58513",
-        "__NEXT_PREVIEW_MODE_ENCRYPTION_KEY": "cdaf4b7fe86e49566af5fc800eae505e4d0e1b63e2c7c8f854991b19ec63119a",
-        "__NEXT_PREVIEW_MODE_SIGNING_KEY": "9e6c87bef67f8a13eeed544f23f68ed9a33f752acda30806b98f9eeda8a40f0c"
+        "NEXT_SERVER_ACTIONS_ENCRYPTION_KEY": "zsK0MwaqIvfcEk4ZV2LhGJBmQRQhAFYMCyLouKJGirw=",
+        "__NEXT_PREVIEW_MODE_ID": "ece2eaa82d15532f920a1f9b39d2646d",
+        "__NEXT_PREVIEW_MODE_ENCRYPTION_KEY": "f12b195e8f941d98f794ad711af0a23f381ab4a92c4460705ba3c5275c8c4301",
+        "__NEXT_PREVIEW_MODE_SIGNING_KEY": "fc1081c6ee8246c9bf1903fb9d4600b08a33ac8a8a3266a4fe1098ba2a37c04f"
       }
     }
   },

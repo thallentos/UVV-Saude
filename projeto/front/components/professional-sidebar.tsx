@@ -1,9 +1,10 @@
 "use client"
 
+import { useState, useEffect } from "react"
+import Image from "next/image"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import {
-  Heart,
   CalendarDays,
   CalendarClock,
   ClipboardList,
@@ -16,7 +17,6 @@ import {
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { useState, useEffect } from "react"
 import { logout, getToken } from "@/lib/auth"
 import { getInitials } from "@/lib/utils"
 import { API_URL } from "@/lib/api"
@@ -49,20 +49,21 @@ export function ProfessionalSidebar() {
         const res = await fetch(`${API_URL}/api/v1/me`, {
           headers: { Authorization: `Bearer ${token}` },
         })
+
         if (!res.ok) return
 
         const data = await res.json()
         setUsuario(data)
       } catch {
-        // silencioso — sidebar não bloqueia a página
+        // silencioso
       }
     }
+
     carregarUsuario()
   }, [])
 
   return (
     <>
-      {/* Mobile toggle */}
       <Button
         variant="ghost"
         size="icon"
@@ -73,7 +74,6 @@ export function ProfessionalSidebar() {
         {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
       </Button>
 
-      {/* Overlay */}
       {open && (
         <div
           className="fixed inset-0 z-40 bg-foreground/20 backdrop-blur-sm md:hidden"
@@ -81,7 +81,6 @@ export function ProfessionalSidebar() {
         />
       )}
 
-      {/* Sidebar */}
       <aside
         className={cn(
           "fixed left-0 top-0 z-40 flex h-full w-64 flex-col border-r border-border bg-card transition-transform duration-200 md:translate-x-0",
@@ -89,18 +88,31 @@ export function ProfessionalSidebar() {
         )}
       >
         <div className="flex items-center gap-3 border-b border-border px-6 py-5">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary">
-            <Heart className="h-5 w-5 text-primary-foreground" />
-          </div>
+          <Image
+            src="/logouvv.png"
+            alt="UVV Saúde"
+            width={300}
+            height={120}
+            className="h-auto w-auto max-h-10 max-w-[42px] object-contain"
+            priority
+          />
+
           <div>
-            <h1 className="font-semibold text-foreground">UVV Health</h1>
-            <p className="text-xs text-muted-foreground">Portal do Profissional</p>
+            <h1 className="font-semibold text-foreground">UVV Saúde</h1>
+            <p className="text-xs text-muted-foreground">
+              Portal do Profissional
+            </p>
           </div>
         </div>
 
-        <nav className="flex flex-1 flex-col gap-1 px-3 py-4" role="navigation" aria-label="Menu do profissional">
+        <nav
+          className="flex flex-1 flex-col gap-1 px-3 py-4"
+          role="navigation"
+          aria-label="Menu do profissional"
+        >
           {navItems.map((item) => {
             const isActive = pathname === item.href
+
             return (
               <Link
                 key={item.href}
@@ -128,10 +140,12 @@ export function ProfessionalSidebar() {
                   {getInitials(usuario.nome)}
                 </AvatarFallback>
               </Avatar>
+
               <div className="flex-1 truncate">
                 <p className="truncate text-sm font-medium text-foreground">
                   {usuario.nome}
                 </p>
+
                 <p className="truncate text-xs text-muted-foreground">
                   {usuario.email}
                 </p>

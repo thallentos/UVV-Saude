@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-
+import Image from "next/image"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
@@ -11,7 +11,6 @@ import {
   Home,
   LogOut,
   User,
-  Heart,
   Menu,
   X,
 } from "lucide-react"
@@ -74,7 +73,6 @@ export function ClientSidebar() {
 
   return (
     <>
-      {/* Mobile toggle */}
       <Button
         variant="ghost"
         size="icon"
@@ -85,7 +83,6 @@ export function ClientSidebar() {
         {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
       </Button>
 
-      {/* Overlay mobile */}
       {open && (
         <div
           className="fixed inset-0 z-40 bg-foreground/20 backdrop-blur-sm md:hidden"
@@ -93,7 +90,6 @@ export function ClientSidebar() {
         />
       )}
 
-      {/* Sidebar */}
       <aside
         className={cn(
           "fixed left-0 top-0 z-40 flex h-full w-64 flex-col border-r border-border bg-card transition-transform duration-200 md:translate-x-0",
@@ -101,11 +97,17 @@ export function ClientSidebar() {
         )}
       >
         <div className="flex items-center gap-3 border-b border-border px-6 py-5">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary">
-            <Heart className="h-5 w-5 text-primary-foreground" />
-          </div>
+          <Image
+            src="/logouvv.png"
+            alt="UVV Saúde"
+            width={300}
+            height={120}
+            className="h-auto w-auto max-h-10 max-w-[42px] object-contain"
+            priority
+          />
+
           <div>
-            <h1 className="font-semibold text-foreground">UVV Health</h1>
+            <h1 className="font-semibold text-foreground">UVV Saúde</h1>
             <p className="text-xs text-muted-foreground">Portal do Cliente</p>
           </div>
         </div>
@@ -113,6 +115,7 @@ export function ClientSidebar() {
         <nav className="flex flex-1 flex-col gap-1 px-3 py-4">
           {menuItems.map((item) => {
             const isActive = pathname === item.href
+
             return (
               <Link
                 key={item.href}
@@ -132,7 +135,7 @@ export function ClientSidebar() {
           })}
         </nav>
 
-        <div className="border-t border-border p-4 space-y-3">
+        <div className="space-y-3 border-t border-border p-4">
           <div className="flex items-center gap-3 rounded-lg bg-accent p-3">
             <Avatar className="h-10 w-10">
               <AvatarFallback className="bg-primary/10 text-primary">
@@ -148,6 +151,7 @@ export function ClientSidebar() {
               <p className="truncate text-sm font-medium text-foreground">
                 {usuario?.nome}
               </p>
+
               <p className="truncate text-xs text-muted-foreground">
                 {usuario?.email}
               </p>
