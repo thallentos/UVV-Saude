@@ -1,68 +1,83 @@
-[00:00:02.338] Server  LOG     ✓ Ready in 1680ms
-[00:00:03.742] Server  ERROR   ⨯ ./projeto/front/app/page.tsx:15:2
-Parsing ecmascript source code failed
-  13 |               <Heart className="h-5 w-5 text-primary-foreground" />
-  14 |             </div>
-> 15 | <<<<<<< HEAD
-     |  ^^
-  16 |             <span className="text-lg font-bold text-foreground">UVV Saúde</span>
-  17 | =======
-  18 |             <span className="text-lg font-bold text-foreground">UVV Health</span>
-
-Expression expected
-
-
-
-./projeto/front/app/page.tsx:15:4
-Parsing ecmascript source code failed
-  13 |               <Heart className="h-5 w-5 text-primary-foreground" />
-  14 |             </div>
-> 15 | <<<<<<< HEAD
-     |    ^^
-  16 |             <span className="text-lg font-bold text-foreground">UVV Saúde</span>
-  17 | =======
-  18 |             <span className="text-lg font-bold text-foreground">UVV Health</span>
-
-Expression expected
-
-
-[00:00:04.518] Browser ERROR   uncaughtError: Error: ./projeto/front/app/page.tsx:15:4
-Parsing ecmascript source code failed
-  13 |               <Heart className="h-5 w-5 text-primary-foreground" />
-  14 |             </div>
-> 15 | <<<<<<< HEAD
-     |    ^^
-  16 |             <span className="text-lg font-bold text-foreground">UVV Saúde</span>
-  17 | =======
-  18 |             <span className="text-lg font-bold text-foreground">UVV Health</span>
-
-Expression expected
-
-
-[00:00:04.971] Browser ERROR   ./projeto/front/app/page.tsx:15:4
-Parsing ecmascript source code failed
-  13 |               <Heart className="h-5 w-5 text-primary-foreground" />
-  14 |             </div>
-> 15 | <<<<<<< HEAD
-     |    ^^
-  16 |             <span className="text-lg font-bold text-foreground">UVV Saúde</span>
-  17 | =======
-  18 |             <span className="text-lg font-bold text-foreground">UVV Health</span>
-
-Expression expected
-[00:00:04.971] Browser ERROR   ./projeto/front/app/page.tsx:15:4
-Parsing ecmascript source code failed
-  13 |               <Heart className="h-5 w-5 text-primary-foreground" />
-  14 |             </div>
-> 15 | <<<<<<< HEAD
-     |    ^^
-  16 |             <span className="text-lg font-bold text-foreground">UVV Saúde</span>
-  17 | =======
-  18 |             <span className="text-lg font-bold text-foreground">UVV Health</span>
-
-Expression expected
-[00:00:12.185] Server  LOG     ✓ Compiled in 214ms
-[00:00:13.848] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[00:00:14.981] Browser LOG     %c[Vercel Web Analytics]%c Debug mode is enabled by default in development. No requests will be sent to the server. color: rgb(120, 120, 120) color: inherit
-[00:00:14.982] Browser LOG     %c[Vercel Web Analytics]%c Running queued event color: rgb(120, 120, 120) color: inherit pageview {"path":"/","route":"/"}
-[00:00:14.982] Browser LOG     %c[Vercel Web Analytics]%c [view] http://localhost:3001/ color: rgb(120, 120, 120) color: inherit {"dp":"/","o":"http://localhost:3001/","sdkn":"@vercel/analytics/next","sdkv":"1.6.1","sv":"0.1.3","ts":1777419934092} /_vercel/insights/view
+{"timestamp":"00:00:00.987","source":"Server","level":"WARN","message":"⚠ The \"middleware\" file convention is deprecated. Please use \"proxy\" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy"}
+{"timestamp":"00:00:01.081","source":"Server","level":"LOG","message":""}
+{"timestamp":"00:00:05.408","source":"Browser","level":"INFO","message":"%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold"}
+{"timestamp":"00:00:05.427","source":"Browser","level":"WARN","message":"Image with src \"http://localhost:3002/logouvv.png\" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: \"auto\"' or 'height: \"auto\"' to maintain the aspect ratio."}
+{"timestamp":"00:00:05.441","source":"Browser","level":"LOG","message":"%c[Vercel Web Analytics]%c Debug mode is enabled by default in development. No requests will be sent to the server. color: rgb(120, 120, 120) color: inherit"}
+{"timestamp":"00:00:05.441","source":"Browser","level":"LOG","message":"%c[Vercel Web Analytics]%c Running queued event color: rgb(120, 120, 120) color: inherit pageview {\"path\":\"/\",\"route\":\"/\"}"}
+{"timestamp":"00:00:05.441","source":"Browser","level":"LOG","message":"%c[Vercel Web Analytics]%c [view] http://localhost:3002/ color: rgb(120, 120, 120) color: inherit {\"dp\":\"/\",\"o\":\"http://localhost:3002/\",\"sdkn\":\"@vercel/analytics/next\",\"sdkv\":\"1.6.1\",\"sv\":\"0.1.3\",\"ts\":1780079509069} /_vercel/insights/view"}
+{"timestamp":"00:00:05.452","source":"Server","level":"WARN","message":"[browser] \"\\u001b[33mImage with src \\\"http://localhost:3002/logouvv.png\\\" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: \\\"auto\\\"' or 'height: \\\"auto\\\"' to maintain the aspect ratio.\\u001b[39m\""}
+{"timestamp":"00:00:05.452","source":"Browser","level":"WARN","message":"\u001b[33mImage with src \"http://localhost:3002/logouvv.png\" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: \"auto\"' or 'height: \"auto\"' to maintain the aspect ratio.\u001b[39m"}
+{"timestamp":"00:00:05.466","source":"Browser","level":"INFO","message":"%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold"}
+{"timestamp":"00:00:06.015","source":"Browser","level":"LOG","message":"%c[Vercel Web Analytics]%c Debug mode is enabled by default in development. No requests will be sent to the server. color: rgb(120, 120, 120) color: inherit"}
+{"timestamp":"00:00:06.015","source":"Browser","level":"LOG","message":"%c[Vercel Web Analytics]%c Running queued event color: rgb(120, 120, 120) color: inherit pageview {\"path\":\"/login\",\"route\":\"/login\"}"}
+{"timestamp":"00:00:06.015","source":"Browser","level":"LOG","message":"%c[Vercel Web Analytics]%c [view] http://localhost:3002/login color: rgb(120, 120, 120) color: inherit {\"dp\":\"/login\",\"o\":\"http://localhost:3002/login\",\"sdkn\":\"@vercel/analytics/next\",\"sdkv\":\"1.6.1\",\"sv\":\"0.1.3\",\"ts\":1780079509192} /_vercel/insights/view"}
+{"timestamp":"00:00:10.379","source":"Browser","level":"INFO","message":"%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold"}
+{"timestamp":"00:00:10.428","source":"Browser","level":"LOG","message":"%c[Vercel Web Analytics]%c Debug mode is enabled by default in development. No requests will be sent to the server. color: rgb(120, 120, 120) color: inherit"}
+{"timestamp":"00:00:10.429","source":"Browser","level":"LOG","message":"%c[Vercel Web Analytics]%c Running queued event color: rgb(120, 120, 120) color: inherit pageview {\"path\":\"/login\",\"route\":\"/login\"}"}
+{"timestamp":"00:00:10.429","source":"Browser","level":"LOG","message":"%c[Vercel Web Analytics]%c [view] http://localhost:3002/login color: rgb(120, 120, 120) color: inherit {\"dp\":\"/login\",\"o\":\"http://localhost:3002/login\",\"r\":\"\",\"sdkn\":\"@vercel/analytics/next\",\"sdkv\":\"1.6.1\",\"sv\":\"0.1.3\",\"ts\":1780079514054} /_vercel/insights/view"}
+{"timestamp":"00:02:15.940","source":"Server","level":"LOG","message":"✓ Compiled in 94ms"}
+{"timestamp":"00:02:16.077","source":"Server","level":"ERROR","message":"⨯ ReferenceError: Image is not defined"}
+{"timestamp":"00:02:16.113","source":"Server","level":"ERROR","message":"⨯ ReferenceError: Image is not defined"}
+{"timestamp":"00:02:16.132","source":"Server","level":"ERROR","message":"⨯ ReferenceError: Image is not defined"}
+{"timestamp":"00:02:16.153","source":"Server","level":"ERROR","message":"⨯ ReferenceError: Image is not defined"}
+{"timestamp":"00:02:16.181","source":"Server","level":"ERROR","message":"⨯ ReferenceError: Image is not defined"}
+{"timestamp":"00:02:16.202","source":"Server","level":"ERROR","message":"⨯ ReferenceError: Image is not defined"}
+{"timestamp":"00:02:17.021","source":"Browser","level":"ERROR","message":"uncaughtError: ReferenceError: Image is not defined"}
+{"timestamp":"00:02:17.375","source":"Server","level":"ERROR","message":"[browser] \"\\u001b[31mUncaught ReferenceError: Image is not defined\\u001b[39m\\n\\u001b[31m    at HomePage (app/page.tsx:41:12)\\u001b[39m\\n  \\u001b[90m39 |\\u001b[0m       <section className=\\u001b[32m\\\"flex flex-1 flex-col items-center justify-center px-4 py-16\\\"\\u001b[0m>\\n  \\u001b[90m40 |\\u001b[0m         <div className=\\u001b[32m\\\"mx-auto flex w-full max-w-3xl flex-col items-center gap-8 text-center\\\"\\u001b[0m>\\n\\u001b[31m\\u001b[1m>\\u001b[0m \\u001b[90m41 |\\u001b[0m           <\\u001b[33mImage\\u001b[0m\\n  \\u001b[90m   |\\u001b[0m            \\u001b[31m\\u001b[1m^\\u001b[0m\\n  \\u001b[90m42 |\\u001b[0m             src=\\u001b[32m\\\"/logouvv.png\\\"\\u001b[0m\\n  \\u001b[90m43 |\\u001b[0m             alt=\\u001b[32m\\\"UVV Saúde\\\"\\u001b[0m\\n  \\u001b[90m44 |\\u001b[0m             width={\\u001b[35m100\\u001b[0m}\""}
+{"timestamp":"00:02:17.376","source":"Browser","level":"ERROR","message":"\u001b[31mUncaught ReferenceError: Image is not defined\u001b[39m\n\u001b[31m    at HomePage (app/page.tsx:41:12)\u001b[39m\n  \u001b[90m39 |\u001b[0m       <section className=\u001b[32m\"flex flex-1 flex-col items-center justify-center px-4 py-16\"\u001b[0m>\n  \u001b[90m40 |\u001b[0m         <div className=\u001b[32m\"mx-auto flex w-full max-w-3xl flex-col items-center gap-8 text-center\"\u001b[0m>\n\u001b[31m\u001b[1m>\u001b[0m \u001b[90m41 |\u001b[0m           <\u001b[33mImage\u001b[0m\n  \u001b[90m   |\u001b[0m            \u001b[31m\u001b[1m^\u001b[0m\n  \u001b[90m42 |\u001b[0m             src=\u001b[32m\"/logouvv.png\"\u001b[0m\n  \u001b[90m43 |\u001b[0m             alt=\u001b[32m\"UVV Saúde\"\u001b[0m\n  \u001b[90m44 |\u001b[0m             width={\u001b[35m100\u001b[0m}"}
+{"timestamp":"00:02:22.140","source":"Server","level":"ERROR","message":"⨯ ReferenceError: Image is not defined"}
+{"timestamp":"00:02:22.318","source":"Browser","level":"INFO","message":"%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold"}
+{"timestamp":"00:02:22.334","source":"Browser","level":"ERROR","message":"uncaughtError: ReferenceError: Image is not defined"}
+{"timestamp":"00:02:22.342","source":"Server","level":"ERROR","message":"[browser] \"\\u001b[31mUncaught ReferenceError: Image is not defined\\u001b[39m\\n\\u001b[31m    at HomePage (app/page.tsx:41:12)\\u001b[39m\\n  \\u001b[90m39 |\\u001b[0m       <section className=\\u001b[32m\\\"flex flex-1 flex-col items-center justify-center px-4 py-16\\\"\\u001b[0m>\\n  \\u001b[90m40 |\\u001b[0m         <div className=\\u001b[32m\\\"mx-auto flex w-full max-w-3xl flex-col items-center gap-8 text-center\\\"\\u001b[0m>\\n\\u001b[31m\\u001b[1m>\\u001b[0m \\u001b[90m41 |\\u001b[0m           <\\u001b[33mImage\\u001b[0m\\n  \\u001b[90m   |\\u001b[0m            \\u001b[31m\\u001b[1m^\\u001b[0m\\n  \\u001b[90m42 |\\u001b[0m             src=\\u001b[32m\\\"/logouvv.png\\\"\\u001b[0m\\n  \\u001b[90m43 |\\u001b[0m             alt=\\u001b[32m\\\"UVV Saúde\\\"\\u001b[0m\\n  \\u001b[90m44 |\\u001b[0m             width={\\u001b[35m100\\u001b[0m}\""}
+{"timestamp":"00:02:22.342","source":"Browser","level":"ERROR","message":"\u001b[31mUncaught ReferenceError: Image is not defined\u001b[39m\n\u001b[31m    at HomePage (app/page.tsx:41:12)\u001b[39m\n  \u001b[90m39 |\u001b[0m       <section className=\u001b[32m\"flex flex-1 flex-col items-center justify-center px-4 py-16\"\u001b[0m>\n  \u001b[90m40 |\u001b[0m         <div className=\u001b[32m\"mx-auto flex w-full max-w-3xl flex-col items-center gap-8 text-center\"\u001b[0m>\n\u001b[31m\u001b[1m>\u001b[0m \u001b[90m41 |\u001b[0m           <\u001b[33mImage\u001b[0m\n  \u001b[90m   |\u001b[0m            \u001b[31m\u001b[1m^\u001b[0m\n  \u001b[90m42 |\u001b[0m             src=\u001b[32m\"/logouvv.png\"\u001b[0m\n  \u001b[90m43 |\u001b[0m             alt=\u001b[32m\"UVV Saúde\"\u001b[0m\n  \u001b[90m44 |\u001b[0m             width={\u001b[35m100\u001b[0m}"}
+{"timestamp":"00:02:27.733","source":"Server","level":"LOG","message":"✓ Compiled in 147ms"}
+{"timestamp":"00:02:28.107","source":"Browser","level":"INFO","message":"%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold"}
+{"timestamp":"00:02:28.143","source":"Browser","level":"LOG","message":"%c[Vercel Web Analytics]%c Debug mode is enabled by default in development. No requests will be sent to the server. color: rgb(120, 120, 120) color: inherit"}
+{"timestamp":"00:02:28.143","source":"Browser","level":"LOG","message":"%c[Vercel Web Analytics]%c Running queued event color: rgb(120, 120, 120) color: inherit pageview {\"path\":\"/\",\"route\":\"/\"}"}
+{"timestamp":"00:02:28.143","source":"Browser","level":"LOG","message":"%c[Vercel Web Analytics]%c [view] http://localhost:3002/ color: rgb(120, 120, 120) color: inherit {\"dp\":\"/\",\"o\":\"http://localhost:3002/\",\"sdkn\":\"@vercel/analytics/next\",\"sdkv\":\"1.6.1\",\"sv\":\"0.1.3\",\"ts\":1780079651763} /_vercel/insights/view"}
+{"timestamp":"00:02:37.883","source":"Browser","level":"INFO","message":"%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold"}
+{"timestamp":"00:02:37.917","source":"Browser","level":"LOG","message":"%c[Vercel Web Analytics]%c Debug mode is enabled by default in development. No requests will be sent to the server. color: rgb(120, 120, 120) color: inherit"}
+{"timestamp":"00:02:37.917","source":"Browser","level":"LOG","message":"%c[Vercel Web Analytics]%c Running queued event color: rgb(120, 120, 120) color: inherit pageview {\"path\":\"/login\",\"route\":\"/login\"}"}
+{"timestamp":"00:02:37.917","source":"Browser","level":"LOG","message":"%c[Vercel Web Analytics]%c [view] http://localhost:3002/login color: rgb(120, 120, 120) color: inherit {\"dp\":\"/login\",\"o\":\"http://localhost:3002/login\",\"r\":\"\",\"sdkn\":\"@vercel/analytics/next\",\"sdkv\":\"1.6.1\",\"sv\":\"0.1.3\",\"ts\":1780079661544} /_vercel/insights/view"}
+{"timestamp":"00:04:30.223","source":"Server","level":"LOG","message":"✓ Compiled in 191ms"}
+{"timestamp":"00:04:36.421","source":"Browser","level":"INFO","message":"%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold"}
+{"timestamp":"00:04:36.449","source":"Browser","level":"LOG","message":"%c[Vercel Web Analytics]%c Debug mode is enabled by default in development. No requests will be sent to the server. color: rgb(120, 120, 120) color: inherit"}
+{"timestamp":"00:04:36.449","source":"Browser","level":"LOG","message":"%c[Vercel Web Analytics]%c Running queued event color: rgb(120, 120, 120) color: inherit pageview {\"path\":\"/\",\"route\":\"/\"}"}
+{"timestamp":"00:04:36.449","source":"Browser","level":"LOG","message":"%c[Vercel Web Analytics]%c [view] http://localhost:3002/ color: rgb(120, 120, 120) color: inherit {\"dp\":\"/\",\"o\":\"http://localhost:3002/\",\"sdkn\":\"@vercel/analytics/next\",\"sdkv\":\"1.6.1\",\"sv\":\"0.1.3\",\"ts\":1780079780072} /_vercel/insights/view"}
+{"timestamp":"00:04:40.989","source":"Browser","level":"LOG","message":"%c[Vercel Web Analytics]%c [view] http://localhost:3002/login color: rgb(120, 120, 120) color: inherit {\"dp\":\"/login\",\"o\":\"http://localhost:3002/login\",\"sdkn\":\"@vercel/analytics/next\",\"sdkv\":\"1.6.1\",\"sv\":\"0.1.3\",\"ts\":1780079784614} /_vercel/insights/view"}
+{"timestamp":"00:05:03.702","source":"Server","level":"LOG","message":"✓ Compiled in 159ms"}
+{"timestamp":"00:05:27.277","source":"Browser","level":"LOG","message":"%c[Vercel Web Analytics]%c [view] http://localhost:3002/profissional color: rgb(120, 120, 120) color: inherit {\"dp\":\"/profissional\",\"o\":\"http://localhost:3002/profissional\",\"sdkn\":\"@vercel/analytics/next\",\"sdkv\":\"1.6.1\",\"sv\":\"0.1.3\",\"ts\":1780079830897} /_vercel/insights/view"}
+{"timestamp":"00:06:31.773","source":"Browser","level":"LOG","message":"%c[Vercel Web Analytics]%c [view] http://localhost:3002/profissional/horarios color: rgb(120, 120, 120) color: inherit {\"dp\":\"/profissional/horarios\",\"o\":\"http://localhost:3002/profissional/horarios\",\"sdkn\":\"@vercel/analytics/next\",\"sdkv\":\"1.6.1\",\"sv\":\"0.1.3\",\"ts\":1780079895388} /_vercel/insights/view"}
+{"timestamp":"00:07:05.218","source":"Browser","level":"LOG","message":"%c[Vercel Web Analytics]%c [view] http://localhost:3002/profissional/agendamentos color: rgb(120, 120, 120) color: inherit {\"dp\":\"/profissional/agendamentos\",\"o\":\"http://localhost:3002/profissional/agendamentos\",\"sdkn\":\"@vercel/analytics/next\",\"sdkv\":\"1.6.1\",\"sv\":\"0.1.3\",\"ts\":1780079928831} /_vercel/insights/view"}
+{"timestamp":"00:07:06.301","source":"Browser","level":"LOG","message":"%c[Vercel Web Analytics]%c [view] http://localhost:3002/profissional/solicitacoes color: rgb(120, 120, 120) color: inherit {\"dp\":\"/profissional/solicitacoes\",\"o\":\"http://localhost:3002/profissional/solicitacoes\",\"sdkn\":\"@vercel/analytics/next\",\"sdkv\":\"1.6.1\",\"sv\":\"0.1.3\",\"ts\":1780079929919} /_vercel/insights/view"}
+{"timestamp":"00:07:07.679","source":"Browser","level":"LOG","message":"%c[Vercel Web Analytics]%c [view] http://localhost:3002/profissional/perfil color: rgb(120, 120, 120) color: inherit {\"dp\":\"/profissional/perfil\",\"o\":\"http://localhost:3002/profissional/perfil\",\"sdkn\":\"@vercel/analytics/next\",\"sdkv\":\"1.6.1\",\"sv\":\"0.1.3\",\"ts\":1780079931299} /_vercel/insights/view"}
+{"timestamp":"00:07:11.060","source":"Browser","level":"LOG","message":"%c[Vercel Web Analytics]%c [view] http://localhost:3002/profissional/solicitacoes color: rgb(120, 120, 120) color: inherit {\"dp\":\"/profissional/solicitacoes\",\"o\":\"http://localhost:3002/profissional/solicitacoes\",\"sdkn\":\"@vercel/analytics/next\",\"sdkv\":\"1.6.1\",\"sv\":\"0.1.3\",\"ts\":1780079934642} /_vercel/insights/view"}
+{"timestamp":"00:07:11.531","source":"Browser","level":"LOG","message":"%c[Vercel Web Analytics]%c [view] http://localhost:3002/profissional/agendamentos color: rgb(120, 120, 120) color: inherit {\"dp\":\"/profissional/agendamentos\",\"o\":\"http://localhost:3002/profissional/agendamentos\",\"sdkn\":\"@vercel/analytics/next\",\"sdkv\":\"1.6.1\",\"sv\":\"0.1.3\",\"ts\":1780079935151} /_vercel/insights/view"}
+{"timestamp":"00:07:16.548","source":"Browser","level":"LOG","message":"%c[Vercel Web Analytics]%c [view] http://localhost:3002/profissional color: rgb(120, 120, 120) color: inherit {\"dp\":\"/profissional\",\"o\":\"http://localhost:3002/profissional\",\"sdkn\":\"@vercel/analytics/next\",\"sdkv\":\"1.6.1\",\"sv\":\"0.1.3\",\"ts\":1780079940151} /_vercel/insights/view"}
+{"timestamp":"00:08:44.970","source":"Browser","level":"INFO","message":"%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold"}
+{"timestamp":"00:08:45.003","source":"Browser","level":"LOG","message":"%c[Vercel Web Analytics]%c Debug mode is enabled by default in development. No requests will be sent to the server. color: rgb(120, 120, 120) color: inherit"}
+{"timestamp":"00:08:45.003","source":"Browser","level":"LOG","message":"%c[Vercel Web Analytics]%c Running queued event color: rgb(120, 120, 120) color: inherit pageview {\"path\":\"/login\",\"route\":\"/login\"}"}
+{"timestamp":"00:08:45.003","source":"Browser","level":"LOG","message":"%c[Vercel Web Analytics]%c [view] http://localhost:3002/login color: rgb(120, 120, 120) color: inherit {\"dp\":\"/login\",\"o\":\"http://localhost:3002/login\",\"sdkn\":\"@vercel/analytics/next\",\"sdkv\":\"1.6.1\",\"sv\":\"0.1.3\",\"ts\":1780080028619} /_vercel/insights/view"}
+{"timestamp":"00:08:49.000","source":"Browser","level":"LOG","message":"%c[Vercel Web Analytics]%c [view] http://localhost:3002/cliente color: rgb(120, 120, 120) color: inherit {\"dp\":\"/cliente\",\"o\":\"http://localhost:3002/cliente\",\"sdkn\":\"@vercel/analytics/next\",\"sdkv\":\"1.6.1\",\"sv\":\"0.1.3\",\"ts\":1780080032616} /_vercel/insights/view"}
+{"timestamp":"00:09:10.800","source":"Browser","level":"LOG","message":"%c[Vercel Web Analytics]%c [view] http://localhost:3002/login color: rgb(120, 120, 120) color: inherit {\"dp\":\"/login\",\"o\":\"http://localhost:3002/login\",\"sdkn\":\"@vercel/analytics/next\",\"sdkv\":\"1.6.1\",\"sv\":\"0.1.3\",\"ts\":1780080054404} /_vercel/insights/view"}
+{"timestamp":"00:09:13.455","source":"Browser","level":"INFO","message":"%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold"}
+{"timestamp":"00:09:14.568","source":"Browser","level":"INFO","message":"%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold"}
+{"timestamp":"00:09:16.252","source":"Browser","level":"INFO","message":"%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold"}
+{"timestamp":"00:09:17.609","source":"Browser","level":"INFO","message":"%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold"}
+{"timestamp":"00:09:17.992","source":"Browser","level":"INFO","message":"%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold"}
+{"timestamp":"00:09:18.324","source":"Browser","level":"INFO","message":"%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold"}
+{"timestamp":"00:09:20.841","source":"Browser","level":"INFO","message":"%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold"}
+{"timestamp":"00:09:20.851","source":"Browser","level":"LOG","message":"%c[Vercel Web Analytics]%c Debug mode is enabled by default in development. No requests will be sent to the server. color: rgb(120, 120, 120) color: inherit"}
+{"timestamp":"00:09:20.851","source":"Browser","level":"LOG","message":"%c[Vercel Web Analytics]%c Running queued event color: rgb(120, 120, 120) color: inherit pageview {\"path\":\"/\",\"route\":\"/\"}"}
+{"timestamp":"00:09:20.851","source":"Browser","level":"LOG","message":"%c[Vercel Web Analytics]%c [view] http://localhost:3002/ color: rgb(120, 120, 120) color: inherit {\"dp\":\"/\",\"o\":\"http://localhost:3002/\",\"r\":\"\",\"sdkn\":\"@vercel/analytics/next\",\"sdkv\":\"1.6.1\",\"sv\":\"0.1.3\",\"ts\":1780080064467} /_vercel/insights/view"}
+{"timestamp":"00:10:12.066","source":"Browser","level":"LOG","message":"%c[Vercel Web Analytics]%c [view] http://localhost:3002/login color: rgb(120, 120, 120) color: inherit {\"dp\":\"/login\",\"o\":\"http://localhost:3002/login\",\"sdkn\":\"@vercel/analytics/next\",\"sdkv\":\"1.6.1\",\"sv\":\"0.1.3\",\"ts\":1780080115673} /_vercel/insights/view"}
+{"timestamp":"00:18:12.790","source":"Browser","level":"LOG","message":"%c[Vercel Web Analytics]%c [view] http://localhost:3002/cliente color: rgb(120, 120, 120) color: inherit {\"dp\":\"/cliente\",\"o\":\"http://localhost:3002/cliente\",\"sdkn\":\"@vercel/analytics/next\",\"sdkv\":\"1.6.1\",\"sv\":\"0.1.3\",\"ts\":1780080596366} /_vercel/insights/view"}
+{"timestamp":"00:18:16.926","source":"Browser","level":"LOG","message":"%c[Vercel Web Analytics]%c [view] http://localhost:3002/cliente/agendar color: rgb(120, 120, 120) color: inherit {\"dp\":\"/cliente/agendar\",\"o\":\"http://localhost:3002/cliente/agendar\",\"sdkn\":\"@vercel/analytics/next\",\"sdkv\":\"1.6.1\",\"sv\":\"0.1.3\",\"ts\":1780080600515} /_vercel/insights/view"}
+{"timestamp":"00:18:30.644","source":"Browser","level":"LOG","message":"%c[Vercel Web Analytics]%c [view] http://localhost:3002/cliente/agendamentos color: rgb(120, 120, 120) color: inherit {\"dp\":\"/cliente/agendamentos\",\"o\":\"http://localhost:3002/cliente/agendamentos\",\"sdkn\":\"@vercel/analytics/next\",\"sdkv\":\"1.6.1\",\"sv\":\"0.1.3\",\"ts\":1780080614233} /_vercel/insights/view"}
+{"timestamp":"00:18:31.721","source":"Browser","level":"LOG","message":"%c[Vercel Web Analytics]%c [view] http://localhost:3002/cliente/perfil color: rgb(120, 120, 120) color: inherit {\"dp\":\"/cliente/perfil\",\"o\":\"http://localhost:3002/cliente/perfil\",\"sdkn\":\"@vercel/analytics/next\",\"sdkv\":\"1.6.1\",\"sv\":\"0.1.3\",\"ts\":1780080615311} /_vercel/insights/view"}
+{"timestamp":"00:18:35.540","source":"Browser","level":"LOG","message":"%c[Vercel Web Analytics]%c [view] http://localhost:3002/cliente color: rgb(120, 120, 120) color: inherit {\"dp\":\"/cliente\",\"o\":\"http://localhost:3002/cliente\",\"sdkn\":\"@vercel/analytics/next\",\"sdkv\":\"1.6.1\",\"sv\":\"0.1.3\",\"ts\":1780080619123} /_vercel/insights/view"}
+{"timestamp":"00:18:48.179","source":"Browser","level":"LOG","message":"%c[Vercel Web Analytics]%c [view] http://localhost:3002/cliente/agendar color: rgb(120, 120, 120) color: inherit {\"dp\":\"/cliente/agendar\",\"o\":\"http://localhost:3002/cliente/agendar\",\"sdkn\":\"@vercel/analytics/next\",\"sdkv\":\"1.6.1\",\"sv\":\"0.1.3\",\"ts\":1780080631765} /_vercel/insights/view"}
+{"timestamp":"00:18:49.739","source":"Browser","level":"LOG","message":"%c[Vercel Web Analytics]%c [view] http://localhost:3002/cliente color: rgb(120, 120, 120) color: inherit {\"dp\":\"/cliente\",\"o\":\"http://localhost:3002/cliente\",\"sdkn\":\"@vercel/analytics/next\",\"sdkv\":\"1.6.1\",\"sv\":\"0.1.3\",\"ts\":1780080633321} /_vercel/insights/view"}
+{"timestamp":"00:19:40.202","source":"Browser","level":"LOG","message":"%c[Vercel Web Analytics]%c [view] http://localhost:3002/cliente/agendar color: rgb(120, 120, 120) color: inherit {\"dp\":\"/cliente/agendar\",\"o\":\"http://localhost:3002/cliente/agendar\",\"sdkn\":\"@vercel/analytics/next\",\"sdkv\":\"1.6.1\",\"sv\":\"0.1.3\",\"ts\":1780080683786} /_vercel/insights/view"}
+{"timestamp":"00:19:41.031","source":"Browser","level":"LOG","message":"%c[Vercel Web Analytics]%c [view] http://localhost:3002/cliente/agendamentos color: rgb(120, 120, 120) color: inherit {\"dp\":\"/cliente/agendamentos\",\"o\":\"http://localhost:3002/cliente/agendamentos\",\"sdkn\":\"@vercel/analytics/next\",\"sdkv\":\"1.6.1\",\"sv\":\"0.1.3\",\"ts\":1780080684618} /_vercel/insights/view"}
+{"timestamp":"00:20:08.543","source":"Browser","level":"LOG","message":"%c[Vercel Web Analytics]%c [view] http://localhost:3002/cliente color: rgb(120, 120, 120) color: inherit {\"dp\":\"/cliente\",\"o\":\"http://localhost:3002/cliente\",\"sdkn\":\"@vercel/analytics/next\",\"sdkv\":\"1.6.1\",\"sv\":\"0.1.3\",\"ts\":1780080712128} /_vercel/insights/view"}

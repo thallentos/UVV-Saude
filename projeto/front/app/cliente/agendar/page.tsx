@@ -1,12 +1,15 @@
 "use client"
 
-import { useState } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { getToken } from "@/lib/auth"
+import { getInitials } from "@/lib/utils"
+import { API_URL } from "@/lib/api"
+import { useState, useEffect, useCallback } from "react"
+import { Search, Star, Loader2, Clock, ChevronLeft, ChevronRight, Calendar } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
-import { Calendar } from "@/components/ui/calendar"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import {
   Select,
   SelectContent,
@@ -17,311 +20,555 @@ import {
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog"
-import { Search, Star, Clock, MapPin, CheckCircle2 } from "lucide-react"
-import { ptBR } from "date-fns/locale"
+import { Textarea } from "@/components/ui/textarea"
+import { Label } from "@/components/ui/label"
 
-const especialidades = [
-  "Todas",
-  "Nutricionista",
-  "Psicólogo",
-  "Clínico Geral",
-  "Fisioterapeuta",
-  "Dermatologista",
+const meses = [
+  "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+  "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
 ]
 
-const profissionais = [
-  {
-    id: 1,
-    nome: "Dra. Ana Costa",
-    especialidade: "Nutricionista",
-    avaliacao: 4.9,
-    totalAvaliacoes: 127,
-    temposDisponiveis: ["09:00", "10:00", "14:00", "15:00", "16:00"],
-    local: "Sala 205 - Bloco B",
-    preco: "R$ 180,00",
-    avatar: "/placeholder-user.jpg",
-  },
-  {
-    id: 2,
-    nome: "Dr. Carlos Lima",
-    especialidade: "Psicólogo",
-    avaliacao: 4.8,
-    totalAvaliacoes: 89,
-    temposDisponiveis: ["08:00", "09:00", "11:00", "14:00"],
-    local: "Sala 310 - Bloco A",
-    preco: "R$ 200,00",
-    avatar: "/placeholder-user.jpg",
-  },
-  {
-    id: 3,
-    nome: "Dra. Juliana Santos",
-    especialidade: "Clínico Geral",
-    avaliacao: 4.7,
-    totalAvaliacoes: 203,
-    temposDisponiveis: ["07:00", "08:00", "09:00", "10:00", "11:00"],
-    local: "Sala 102 - Bloco C",
-    preco: "R$ 150,00",
-    avatar: "/placeholder-user.jpg",
-  },
-  {
-    id: 4,
-    nome: "Dr. Roberto Mendes",
-    especialidade: "Fisioterapeuta",
-    avaliacao: 4.9,
-    totalAvaliacoes: 156,
-    temposDisponiveis: ["10:00", "11:00", "15:00", "16:00", "17:00"],
-    local: "Sala 401 - Bloco D",
-    preco: "R$ 120,00",
-    avatar: "/placeholder-user.jpg",
-  },
-]
+const diasSemanaAbrev = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"]
 
-export default function AgendarConsulta() {
+interface Profissional {
+  usuario_id: number
+  nome: string
+  email: string
+  telefone: string | null
+  foto_url: string | null
+  especialidade_id: number
+  especialidade_nome: string
+  registro_prof: string
+  bio: string | null
+}
+
+interface Slot {
+  id: number
+  profissional_id: number
+  data_disponivel: string
+  horario_inicio: string
+  status_vaga: "LIVRE" | "OCUPADO"
+}
+
+function gerarDiasDoMes(ano: number, mes: number): string[] {
+  const dias: string[] = []
+  const total = new Date(ano, mes + 1, 0).getDate()
+  for (let d = 1; d <= total; d++) {
+    const mm = String(mes + 1).padStart(2, "0")
+    const dd = String(d).padStart(2, "0")
+    dias.push(`${ano}-${mm}-${dd}`)
+  }
+  return dias
+}
+
+function primeiroDiaSemana(ano: number, mes: number): number {
+  return new Date(ano, mes, 1).getDay()
+}
+
+function formatarData(dataStr: string): string {
+  const [ano, mes, dia] = dataStr.split("-")
+  return `${dia}/${mes}/${ano}`
+}
+
+export default function AgendarConsultaPage() {
+  const [profissionais, setProfissionais] = useState<Profissional[]>([])
+  const [carregandoProfs, setCarregandoProfs] = useState(true)
   const [busca, setBusca] = useState("")
-  const [especialidadeFiltro, setEspecialidadeFiltro] = useState("Todas")
-  const [profissionalSelecionado, setProfissionalSelecionado] = useState<typeof profissionais[0] | null>(null)
-  const [dataSelecionada, setDataSelecionada] = useState<Date | undefined>(undefined)
-  const [horarioSelecionado, setHorarioSelecionado] = useState<string | null>(null)
-  const [dialogAberto, setDialogAberto] = useState(false)
-  const [confirmado, setConfirmado] = useState(false)
+  const [filtroEspecialidade, setFiltroEspecialidade] = useState("todas")
 
-  const profissionaisFiltrados = profissionais.filter((p) => {
-    const matchBusca = p.nome.toLowerCase().includes(busca.toLowerCase())
-    const matchEspecialidade = especialidadeFiltro === "Todas" || p.especialidade === especialidadeFiltro
-    return matchBusca && matchEspecialidade
-  })
+  const [profissionalSelecionado, setProfissionalSelecionado] = useState<Profissional | null>(null)
+  const [slots, setSlots] = useState<Slot[]>([])
+  const [carregandoSlots, setCarregandoSlots] = useState(false)
+  const [modalAberto, setModalAberto] = useState(false)
 
-  const handleSelecionarProfissional = (profissional: typeof profissionais[0]) => {
+  const [mesAtual, setMesAtual] = useState(() => new Date().getMonth())
+  const [anoAtual, setAnoAtual] = useState(() => new Date().getFullYear())
+  const [diaSelecionado, setDiaSelecionado] = useState<string | null>(null)
+  const [slotSelecionado, setSlotSelecionado] = useState<Slot | null>(null)
+  const [observacoes, setObservacoes] = useState("")
+
+  const [confirmandoAberto, setConfirmandoAberto] = useState(false)
+  const [salvando, setSalvando] = useState(false)
+  const [sucesso, setSucesso] = useState(false)
+  const [erro, setErro] = useState("")
+
+  const carregarProfissionais = useCallback(async () => {
+    setCarregandoProfs(true)
+    try {
+      const params = filtroEspecialidade !== "todas"
+        ? `?especialidade_id=${filtroEspecialidade}`
+        : ""
+      const res = await fetch(`${API_URL}/api/v1/profissionais${params}`, {
+        headers: { Authorization: `Bearer ${getToken()}` },
+      })
+      if (!res.ok) throw new Error()
+      const data: Profissional[] = await res.json()
+      setProfissionais(data)
+    } catch {
+      setErro("Não foi possível carregar os profissionais.")
+    } finally {
+      setCarregandoProfs(false)
+    }
+  }, [filtroEspecialidade])
+
+  useEffect(() => {
+    carregarProfissionais()
+  }, [carregarProfissionais])
+
+  // Especialidades derivadas dinamicamente dos profissionais carregados
+  const especialidades = Array.from(
+    new Map(
+      profissionais.map(p => [p.especialidade_id, p.especialidade_nome])
+    ).entries()
+  ).map(([id, nome]) => ({ id, nome }))
+
+  async function abrirAgenda(profissional: Profissional) {
     setProfissionalSelecionado(profissional)
-    setDataSelecionada(undefined)
-    setHorarioSelecionado(null)
+    setDiaSelecionado(null)
+    setSlotSelecionado(null)
+    setObservacoes("")
+    setSucesso(false)
+    setErro("")
+    setModalAberto(true)
+    setCarregandoSlots(true)
+    try {
+      const res = await fetch(
+        `${API_URL}/api/v1/agenda/profissional/${profissional.usuario_id}`,
+        { headers: { Authorization: `Bearer ${getToken()}` } }
+      )
+      if (!res.ok) throw new Error()
+      const data: Slot[] = await res.json()
+      setSlots(data)
+    } catch {
+      setErro("Não foi possível carregar a agenda do profissional.")
+    } finally {
+      setCarregandoSlots(false)
+    }
   }
 
-  const handleConfirmar = () => {
-    setConfirmado(true)
-  }
-
-  const handleFecharDialog = () => {
-    setDialogAberto(false)
-    setConfirmado(false)
+  function fecharModal() {
+    setModalAberto(false)
     setProfissionalSelecionado(null)
-    setDataSelecionada(undefined)
-    setHorarioSelecionado(null)
+    setSlots([])
+    setDiaSelecionado(null)
+    setSlotSelecionado(null)
+    setObservacoes("")
+    setSucesso(false)
+    setErro("")
   }
+
+  function slotsDoDia(data: string): Slot[] {
+    return slots
+      .filter(s => s.data_disponivel.split("T")[0] === data)
+      .sort((a, b) => a.horario_inicio.localeCompare(b.horario_inicio))
+  }
+
+  function diasComSlots(): Set<string> {
+    const set = new Set<string>()
+    slots.forEach(s => {
+      const d = s.data_disponivel.split("T")[0]
+      if (d) set.add(d)
+    })
+    return set
+  }
+
+  function selecionarDia(data: string) {
+    setDiaSelecionado(data)
+    setSlotSelecionado(null)
+  }
+
+  function mesAnterior() {
+    if (mesAtual === 0) { setMesAtual(11); setAnoAtual(a => a - 1) }
+    else setMesAtual(m => m - 1)
+  }
+
+  function proximoMes() {
+    if (mesAtual === 11) { setMesAtual(0); setAnoAtual(a => a + 1) }
+    else setMesAtual(m => m + 1)
+  }
+
+  async function confirmarAgendamento() {
+    if (!slotSelecionado) return
+    setSalvando(true)
+    setErro("")
+    try {
+      const res = await fetch(`${API_URL}/api/v1/consultas`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${getToken()}`,
+        },
+        body: JSON.stringify({
+          agenda_id: slotSelecionado.id,
+          observacoes: observacoes || undefined,
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.message ?? "Erro ao solicitar agendamento.")
+      setSucesso(true)
+      setConfirmandoAberto(false)
+      setSlots(prev => prev.filter(s => s.id !== slotSelecionado.id))
+      setSlotSelecionado(null)
+      setDiaSelecionado(null)
+    } catch (e: unknown) {
+      setErro(e instanceof Error ? e.message : "Erro ao solicitar agendamento.")
+      setConfirmandoAberto(false)
+    } finally {
+      setSalvando(false)
+    }
+  }
+
+  const profissionaisFiltrados = profissionais.filter(p =>
+    p.nome.toLowerCase().includes(busca.toLowerCase())
+  )
+
+  const dias = gerarDiasDoMes(anoAtual, mesAtual)
+  const offset = primeiroDiaSemana(anoAtual, mesAtual)
+  const diasDisponiveis = diasComSlots()
+  const slotsDiaSelecionado = diaSelecionado ? slotsDoDia(diaSelecionado) : []
 
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">
-          Agendar Consulta
-        </h1>
-        <p className="mt-1 text-muted-foreground">
-          Encontre o profissional ideal e agende sua consulta em poucos passos.
+        <h1 className="text-2xl font-bold text-foreground">Agendar Consulta</h1>
+        <p className="text-muted-foreground">
+          Escolha um profissional e selecione um horário disponível
         </p>
       </div>
 
-      <div className="flex flex-col gap-4 sm:flex-row">
+      {/* Filtros */}
+      <div className="flex flex-col gap-3 sm:flex-row">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="Buscar por nome do profissional..."
+            placeholder="Buscar profissional..."
             value={busca}
-            onChange={(e) => setBusca(e.target.value)}
+            onChange={e => setBusca(e.target.value)}
             className="pl-10"
           />
         </div>
-        <Select value={especialidadeFiltro} onValueChange={setEspecialidadeFiltro}>
-          <SelectTrigger className="w-full sm:w-[200px]">
+
+        <Select value={filtroEspecialidade} onValueChange={setFiltroEspecialidade}>
+          <SelectTrigger className="w-full sm:w-52">
             <SelectValue placeholder="Especialidade" />
           </SelectTrigger>
           <SelectContent>
-            {especialidades.map((esp) => (
-              <SelectItem key={esp} value={esp}>
-                {esp}
+            <SelectItem value="todas">Todas as especialidades</SelectItem>
+            {especialidades.map(e => (
+              <SelectItem key={e.id} value={String(e.id)}>
+                {e.nome}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <div className="space-y-4">
-          <h2 className="text-lg font-semibold text-foreground">Profissionais Disponíveis</h2>
-          <div className="space-y-4">
-            {profissionaisFiltrados.map((profissional) => (
-              <Card
-                key={profissional.id}
-                className={`cursor-pointer transition-all hover:border-primary/50 ${
-                  profissionalSelecionado?.id === profissional.id
-                    ? "border-primary ring-1 ring-primary"
-                    : ""
-                }`}
-                onClick={() => handleSelecionarProfissional(profissional)}
-              >
-                <CardContent className="p-4">
-                  <div className="flex gap-4">
-                    <Avatar className="h-16 w-16">
-                      <AvatarImage src={profissional.avatar} alt={profissional.nome} />
-                      <AvatarFallback className="bg-primary/10 text-primary text-lg">
-                        {profissional.nome.split(" ").map(n => n[0]).join("").slice(0, 2)}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1">
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <h3 className="font-semibold text-foreground">{profissional.nome}</h3>
-                          <p className="text-sm text-muted-foreground">{profissional.especialidade}</p>
-                        </div>
-                        <Badge variant="secondary" className="text-primary">
-                          {profissional.preco}
-                        </Badge>
-                      </div>
-                      <div className="mt-2 flex items-center gap-4 text-sm">
-                        <div className="flex items-center gap-1">
-                          <Star className="h-4 w-4 fill-warning text-warning" />
-                          <span className="font-medium text-foreground">{profissional.avaliacao}</span>
-                          <span className="text-muted-foreground">({profissional.totalAvaliacoes})</span>
-                        </div>
-                        <div className="flex items-center gap-1 text-muted-foreground">
-                          <MapPin className="h-4 w-4" />
-                          {profissional.local}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+      {/* Lista de profissionais */}
+      {carregandoProfs ? (
+        <div className="flex h-48 items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
-
-        {profissionalSelecionado && (
-          <Card className="h-fit">
-            <CardHeader>
-              <CardTitle className="text-lg">Selecione Data e Horário</CardTitle>
-              <CardDescription>
-                Escolha o melhor momento para sua consulta com {profissionalSelecionado.nome}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div>
-                <p className="mb-2 text-sm font-medium text-foreground">Data</p>
-                <Calendar
-                  mode="single"
-                  selected={dataSelecionada}
-                  onSelect={setDataSelecionada}
-                  locale={ptBR}
-                  disabled={(date) => date < new Date() || date.getDay() === 0 || date.getDay() === 6}
-                  className="rounded-md border"
-                />
-              </div>
-
-              {dataSelecionada && (
-                <div>
-                  <p className="mb-3 text-sm font-medium text-foreground">Horários Disponíveis</p>
-                  <div className="grid grid-cols-3 gap-2">
-                    {profissionalSelecionado.temposDisponiveis.map((horario) => (
-                      <Button
-                        key={horario}
-                        variant={horarioSelecionado === horario ? "default" : "outline"}
-                        size="sm"
-                        className="gap-1"
-                        onClick={() => setHorarioSelecionado(horario)}
-                      >
-                        <Clock className="h-3 w-3" />
-                        {horario}
-                      </Button>
-                    ))}
+      ) : profissionaisFiltrados.length === 0 ? (
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center py-12">
+            <p className="text-muted-foreground">Nenhum profissional encontrado.</p>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {profissionaisFiltrados.map(prof => (
+            <Card
+              key={prof.usuario_id}
+              className="cursor-pointer transition-all hover:border-primary/50 hover:shadow-md"
+              onClick={() => abrirAgenda(prof)}
+            >
+              <CardContent className="p-5">
+                <div className="flex items-start gap-4">
+                  <Avatar className="h-14 w-14">
+                    <AvatarFallback className="bg-primary/10 text-primary text-lg">
+                      {getInitials(prof.nome)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="min-w-0 flex-1">
+                    <h3 className="truncate font-semibold text-foreground">{prof.nome}</h3>
+                    <p className="text-sm text-muted-foreground">{prof.especialidade_nome}</p>
+                    <Badge variant="secondary" className="mt-2 text-xs">
+                      {prof.registro_prof}
+                    </Badge>
+                    {prof.bio && (
+                      <p className="mt-2 line-clamp-2 text-xs text-muted-foreground">
+                        {prof.bio}
+                      </p>
+                    )}
                   </div>
                 </div>
-              )}
+                <div className="mt-4 flex items-center gap-2 text-sm font-medium text-primary">
+                  <Calendar className="h-4 w-4" />
+                  Ver horários disponíveis
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
 
-              {dataSelecionada && horarioSelecionado && (
-                <Button className="w-full" size="lg" onClick={() => setDialogAberto(true)}>
-                  Confirmar Agendamento
-                </Button>
-              )}
-            </CardContent>
-          </Card>
-        )}
-      </div>
-
-      <Dialog open={dialogAberto} onOpenChange={setDialogAberto}>
-        <DialogContent>
-          {!confirmado ? (
-            <>
-              <DialogHeader>
-                <DialogTitle>Confirmar Agendamento</DialogTitle>
-                <DialogDescription>
-                  Revise os detalhes da sua consulta antes de confirmar.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="space-y-4 py-4">
-                <div className="flex items-center gap-4 rounded-lg bg-muted/50 p-4">
-                  <Avatar className="h-12 w-12">
-                    <AvatarImage src={profissionalSelecionado?.avatar} alt={profissionalSelecionado?.nome} />
+      {/* Modal de agenda do profissional */}
+      <Dialog open={modalAberto} onOpenChange={fecharModal}>
+        <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              {profissionalSelecionado && (
+                <>
+                  <Avatar className="h-10 w-10">
                     <AvatarFallback className="bg-primary/10 text-primary">
-                      {profissionalSelecionado?.nome.split(" ").map(n => n[0]).join("").slice(0, 2)}
+                      {getInitials(profissionalSelecionado.nome)}
                     </AvatarFallback>
                   </Avatar>
                   <div>
-                    <p className="font-semibold text-foreground">{profissionalSelecionado?.nome}</p>
-                    <p className="text-sm text-muted-foreground">{profissionalSelecionado?.especialidade}</p>
+                    <p className="font-semibold">{profissionalSelecionado.nome}</p>
+                    <p className="text-sm font-normal text-muted-foreground">
+                      {profissionalSelecionado.especialidade_nome}
+                    </p>
                   </div>
-                </div>
-                <div className="grid gap-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Data</span>
-                    <span className="font-medium text-foreground">
-                      {dataSelecionada?.toLocaleDateString("pt-BR", {
-                        weekday: "long",
-                        day: "numeric",
-                        month: "long",
-                      })}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Horário</span>
-                    <span className="font-medium text-foreground">{horarioSelecionado}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Local</span>
-                    <span className="font-medium text-foreground">{profissionalSelecionado?.local}</span>
-                  </div>
-                  <div className="flex justify-between border-t border-border pt-2">
-                    <span className="text-muted-foreground">Valor</span>
-                    <span className="font-semibold text-primary">{profissionalSelecionado?.preco}</span>
-                  </div>
-                </div>
+                </>
+              )}
+            </DialogTitle>
+            <DialogDescription>
+              Selecione um dia disponível e escolha um horário
+            </DialogDescription>
+          </DialogHeader>
+
+          {sucesso ? (
+            <div className="flex flex-col items-center gap-4 py-8 text-center">
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
+                <Star className="h-8 w-8 text-green-600" />
               </div>
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setDialogAberto(false)}>
-                  Cancelar
-                </Button>
-                <Button onClick={handleConfirmar}>
-                  Confirmar Agendamento
-                </Button>
-              </DialogFooter>
-            </>
+              <h3 className="text-lg font-semibold text-foreground">Solicitação enviada!</h3>
+              <p className="text-sm text-muted-foreground">
+                Sua solicitação foi enviada e aguarda aprovação do profissional.
+                Você receberá uma confirmação em breve.
+              </p>
+              <Button onClick={fecharModal}>Fechar</Button>
+            </div>
+          ) : carregandoSlots ? (
+            <div className="flex h-48 items-center justify-center">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
           ) : (
-            <div className="flex flex-col items-center py-8 text-center">
-              <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-success/10">
-                <CheckCircle2 className="h-8 w-8 text-success" />
-              </div>
-              <DialogTitle className="mb-2">Agendamento Confirmado!</DialogTitle>
-              <DialogDescription className="mb-6">
-                Sua consulta foi agendada com sucesso. Você receberá uma confirmação por e-mail.
-              </DialogDescription>
-              <Button onClick={handleFecharDialog}>
-                Voltar para Agendamentos
-              </Button>
+            <div className="space-y-4">
+              {erro && (
+                <div className="rounded-lg border border-destructive/50 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                  {erro}
+                </div>
+              )}
+
+              {slots.length === 0 ? (
+                <div className="flex flex-col items-center gap-2 py-8 text-center">
+                  <Clock className="h-10 w-10 text-muted-foreground/50" />
+                  <p className="font-medium text-foreground">Nenhum horário disponível</p>
+                  <p className="text-sm text-muted-foreground">
+                    Este profissional não possui horários livres no momento.
+                  </p>
+                </div>
+              ) : (
+                <>
+                  {/* Navegação do mês */}
+                  <div className="flex items-center justify-between">
+                    <Button variant="outline" size="icon" onClick={mesAnterior}>
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    <span className="font-semibold text-foreground">
+                      {meses[mesAtual]} {anoAtual}
+                    </span>
+                    <Button variant="outline" size="icon" onClick={proximoMes}>
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </div>
+
+                  {/* Legenda */}
+                  <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                    <div className="flex items-center gap-1.5">
+                      <div className="h-2.5 w-2.5 rounded-full bg-primary" />
+                      <span>Horários disponíveis</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <div className="h-2.5 w-2.5 rounded-full border border-border" />
+                      <span>Sem horários</span>
+                    </div>
+                  </div>
+
+                  {/* Calendário */}
+                  <div className="rounded-lg border border-border p-3">
+                    <div className="mb-2 grid grid-cols-7 gap-1">
+                      {diasSemanaAbrev.map(d => (
+                        <div key={d} className="py-1 text-center text-xs font-medium text-muted-foreground">
+                          {d}
+                        </div>
+                      ))}
+                    </div>
+                    <div className="grid grid-cols-7 gap-1">
+                      {Array.from({ length: offset }).map((_, i) => (
+                        <div key={`empty-${i}`} />
+                      ))}
+                      {dias.map(data => {
+                        const temSlot = diasDisponiveis.has(data)
+                        const diaNum = Number(data.split("-")[2])
+                        const ehHoje = data === new Date().toISOString().split("T")[0]
+                        const selecionado = diaSelecionado === data
+                        const passado = new Date(data + "T00:00:00") < new Date(new Date().toDateString())
+
+                        return (
+                          <button
+                            key={data}
+                            disabled={!temSlot || passado}
+                            onClick={() => selecionarDia(data)}
+                            className={`
+                              relative flex flex-col items-center justify-center rounded-lg p-1.5 text-sm
+                              transition-all
+                              ${passado ? "cursor-not-allowed opacity-30" : ""}
+                              ${!temSlot && !passado ? "cursor-not-allowed text-muted-foreground/40" : ""}
+                              ${temSlot && !passado ? "cursor-pointer hover:bg-accent" : ""}
+                              ${ehHoje ? "border-2 border-primary font-bold" : "border border-transparent"}
+                              ${selecionado ? "bg-primary text-primary-foreground hover:bg-primary" : ""}
+                            `}
+                          >
+                            <span>{diaNum}</span>
+                            {temSlot && !passado && (
+                              <div className={`mt-0.5 h-1.5 w-1.5 rounded-full ${selecionado ? "bg-primary-foreground" : "bg-primary"}`} />
+                            )}
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Horários do dia selecionado */}
+                  {diaSelecionado && (
+                    <div className="space-y-3">
+                      <p className="text-sm font-medium text-foreground">
+                        Horários disponíveis em {formatarData(diaSelecionado)}
+                      </p>
+                      {slotsDiaSelecionado.length === 0 ? (
+                        <p className="text-sm text-muted-foreground">
+                          Nenhum horário disponível neste dia.
+                        </p>
+                      ) : (
+                        <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
+                          {slotsDiaSelecionado.map(slot => (
+                            <button
+                              key={slot.id}
+                              onClick={() => setSlotSelecionado(slot)}
+                              className={`
+                                flex items-center justify-center gap-1.5 rounded-lg border p-2.5 text-sm
+                                transition-all hover:border-primary
+                                ${slotSelecionado?.id === slot.id
+                                  ? "border-primary bg-primary text-primary-foreground"
+                                  : "border-border text-foreground"
+                                }
+                              `}
+                            >
+                              <Clock className="h-3.5 w-3.5" />
+                              {slot.horario_inicio.slice(0, 5)}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Resumo e confirmação */}
+                  {slotSelecionado && (
+                    <div className="space-y-3 rounded-lg border border-primary/20 bg-primary/5 p-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium text-foreground">Horário selecionado</p>
+                          <p className="text-sm text-muted-foreground">
+                            {formatarData(diaSelecionado!)} às {slotSelecionado.horario_inicio.slice(0, 5)}
+                          </p>
+                        </div>
+                        <Badge className="bg-green-100 text-green-700">Disponível</Badge>
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label className="text-sm">Observações (opcional)</Label>
+                        <Textarea
+                          placeholder="Descreva o motivo da consulta ou informações relevantes..."
+                          value={observacoes}
+                          onChange={e => setObservacoes(e.target.value)}
+                          className="min-h-[80px] resize-none text-sm"
+                        />
+                      </div>
+                      <Button
+                        className="w-full"
+                        onClick={() => setConfirmandoAberto(true)}
+                      >
+                        Solicitar Agendamento
+                      </Button>
+                    </div>
+                  )}
+                </>
+              )}
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal de confirmação */}
+      <Dialog open={confirmandoAberto} onOpenChange={setConfirmandoAberto}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Confirmar solicitação</DialogTitle>
+            <DialogDescription>
+              Revise os detalhes antes de confirmar
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 py-2">
+            <div className="space-y-2 rounded-lg bg-muted/50 p-4 text-sm">
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Profissional</span>
+                <span className="font-medium text-foreground">{profissionalSelecionado?.nome}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Especialidade</span>
+                <span className="font-medium text-foreground">{profissionalSelecionado?.especialidade_nome}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Data</span>
+                <span className="font-medium text-foreground">
+                  {diaSelecionado && formatarData(diaSelecionado)}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Horário</span>
+                <span className="font-medium text-foreground">
+                  {slotSelecionado?.horario_inicio.slice(0, 5)}
+                </span>
+              </div>
+            </div>
+            <p className="text-center text-xs text-muted-foreground">
+              Sua solicitação ficará pendente até o profissional aprovar.
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              className="flex-1"
+              onClick={() => setConfirmandoAberto(false)}
+            >
+              Cancelar
+            </Button>
+            <Button
+              className="flex-1"
+              disabled={salvando}
+              onClick={confirmarAgendamento}
+            >
+              {salvando ? <Loader2 className="h-4 w-4 animate-spin" /> : "Confirmar"}
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

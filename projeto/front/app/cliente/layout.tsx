@@ -6,10 +6,10 @@ export default function ClienteLayout({
   children: React.ReactNode
 }) {
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="min-h-screen bg-background">
       <ClientSidebar />
-      <main className="flex-1 overflow-auto">
-        <div className="container max-w-6xl py-8">
+      <main className="md:ml-64">
+        <div className="mx-auto max-w-6xl px-4 py-6 md:px-8 md:py-8">
           {children}
         </div>
       </main>

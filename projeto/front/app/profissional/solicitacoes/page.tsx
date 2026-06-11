@@ -1,9 +1,12 @@
 "use client"
 
-import { useState } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { getToken, logout } from "@/lib/auth"
+import { getInitials } from "@/lib/utils"
+import { API_URL } from "@/lib/api"
+import { useState, useEffect, useCallback } from "react"
+import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import {
@@ -15,166 +18,250 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Calendar, Clock, Check, X, Search, User, Phone, Mail, FileText } from "lucide-react"
+import { Calendar, Clock, Check, X, Search, Mail, Loader2, FileText } from "lucide-react"
 
-const solicitacoesPendentes = [
-  {
-    id: 1,
-    paciente: "João Silva",
-    email: "joao.silva@email.com",
-    telefone: "(27) 99888-7766",
-    dataDesejada: "16 de Abril, 2026",
-    horarioDesejado: "09:00",
-    motivo: "Primeira consulta - Avaliação nutricional completa",
-    dataSolicitacao: "12 de Abril, 2026",
-    avatar: "/placeholder-user.jpg",
-  },
-  {
-    id: 2,
-    paciente: "Ana Beatriz Costa",
-    email: "ana.costa@email.com",
-    telefone: "(27) 99777-5544",
-    dataDesejada: "17 de Abril, 2026",
-    horarioDesejado: "14:00",
-    motivo: "Retorno - Acompanhamento de dieta",
-    dataSolicitacao: "12 de Abril, 2026",
-    avatar: "/placeholder-user.jpg",
-  },
-  {
-    id: 3,
-    paciente: "Pedro Henrique Lima",
-    email: "pedro.lima@email.com",
-    telefone: "(27) 99666-3322",
-    dataDesejada: "18 de Abril, 2026",
-    horarioDesejado: "10:00",
-    motivo: "Reeducação alimentar para ganho de massa muscular",
-    dataSolicitacao: "13 de Abril, 2026",
-    avatar: "/placeholder-user.jpg",
-  },
-]
+interface Consulta {
+  id: number
+  paciente_id: number
+  paciente_nome: string
+  paciente_email: string
+  agenda_id: number
+  data_disponivel: string
+  horario_inicio: string
+  profissional_id: number
+  profissional_nome: string
+  especialidade_nome: string
+  status_consulta: string
+  observacoes: string | null
+  created_at: string
+  updated_at: string
+}
 
-const solicitacoesProcessadas = [
-  {
-    id: 4,
-    paciente: "Carla Mendes",
-    dataDesejada: "14 de Abril, 2026",
-    horarioDesejado: "11:00",
-    status: "aprovada",
-    dataProcessamento: "11 de Abril, 2026",
-    avatar: "/placeholder-user.jpg",
-  },
-  {
-    id: 5,
-    paciente: "Roberto Alves",
-    dataDesejada: "15 de Abril, 2026",
-    horarioDesejado: "16:00",
-    status: "recusada",
-    dataProcessamento: "10 de Abril, 2026",
-    motivo: "Horário indisponível",
-    avatar: "/placeholder-user.jpg",
-  },
-]
+function formatarData(dataStr: string): string {
+  const d = dataStr.split("T")[0] ?? dataStr
+  const [ano, mes, dia] = d.split("-")
+  return `${dia}/${mes}/${ano}`
+}
 
-export default function Solicitacoes() {
+function getStatusBadge(status: string) {
+  switch (status) {
+    case "PENDENTE":
+      return <Badge className="bg-yellow-100 text-yellow-700 hover:bg-yellow-100">Pendente</Badge>
+    case "CONFIRMADA":
+      return <Badge className="bg-green-100 text-green-700 hover:bg-green-100">Confirmada</Badge>
+    case "RECUSADA":
+      return <Badge className="bg-red-100 text-red-700 hover:bg-red-100">Recusada</Badge>
+    case "CANCELADA":
+      return <Badge className="bg-gray-100 text-gray-700 hover:bg-gray-100">Cancelada</Badge>
+    case "CONCLUIDA":
+      return <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-100">Concluída</Badge>
+    default:
+      return <Badge variant="secondary">{status}</Badge>
+  }
+}
+
+// Ordena um array de consultas por data + horário, mais recentes primeiro
+function ordenarPorDataDesc(lista: Consulta[]): Consulta[] {
+  return [...lista].sort((a, b) => {
+    const dataA = `${String(a.data_disponivel).split("T")[0]}T${a.horario_inicio}`
+    const dataB = `${String(b.data_disponivel).split("T")[0]}T${b.horario_inicio}`
+    return dataB.localeCompare(dataA)
+  })
+}
+
+export default function SolicitacoesPage() {
+  const [consultas, setConsultas] = useState<Consulta[]>([])
+  const [carregando, setCarregando] = useState(true)
   const [busca, setBusca] = useState("")
-  const [solicitacoes, setSolicitacoes] = useState(solicitacoesPendentes)
-  const [processadas, setProcessadas] = useState(solicitacoesProcessadas)
-  const [solicitacaoSelecionada, setSolicitacaoSelecionada] = useState<typeof solicitacoesPendentes[0] | null>(null)
+  const [selecionada, setSelecionada] = useState<Consulta | null>(null)
   const [dialogDetalhes, setDialogDetalhes] = useState(false)
   const [dialogAprovar, setDialogAprovar] = useState(false)
   const [dialogRecusar, setDialogRecusar] = useState(false)
+  const [processando, setProcessando] = useState(false)
+  const [erro, setErro] = useState("")
 
-  const solicitacoesFiltradas = solicitacoes.filter((s) =>
-    s.paciente.toLowerCase().includes(busca.toLowerCase())
-  )
-
-  const handleAprovar = () => {
-    if (solicitacaoSelecionada) {
-      setProcessadas([
-        {
-          id: solicitacaoSelecionada.id,
-          paciente: solicitacaoSelecionada.paciente,
-          dataDesejada: solicitacaoSelecionada.dataDesejada,
-          horarioDesejado: solicitacaoSelecionada.horarioDesejado,
-          status: "aprovada",
-          dataProcessamento: "13 de Abril, 2026",
-          avatar: solicitacaoSelecionada.avatar,
-        },
-        ...processadas,
-      ])
-      setSolicitacoes(solicitacoes.filter((s) => s.id !== solicitacaoSelecionada.id))
+  const carregarSolicitacoes = useCallback(async () => {
+    setCarregando(true)
+    try {
+      const res = await fetch(`${API_URL}/api/v1/consultas/solicitacoes`, {
+        headers: { Authorization: `Bearer ${getToken()}` },
+      })
+      if (!res.ok) throw new Error()
+      const data: Consulta[] = await res.json()
+      setConsultas(data)
+    } catch {
+      setErro("Não foi possível carregar as solicitações.")
+    } finally {
+      setCarregando(false)
     }
-    setDialogAprovar(false)
-    setDialogDetalhes(false)
-    setSolicitacaoSelecionada(null)
+  }, [])
+
+  useEffect(() => {
+    carregarSolicitacoes()
+  }, [carregarSolicitacoes])
+
+  async function aprovar() {
+    if (!selecionada) return
+    setProcessando(true)
+    try {
+      const res = await fetch(`${API_URL}/api/v1/consultas/${selecionada.id}/aprovar`, {
+        method: "PUT",
+        headers: { Authorization: `Bearer ${getToken()}` },
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.message ?? "Erro ao aprovar.")
+      setConsultas(prev =>
+        prev.map(c => c.id === selecionada.id ? { ...c, status_consulta: "CONFIRMADA" } : c)
+      )
+      setDialogAprovar(false)
+      setDialogDetalhes(false)
+      setSelecionada(null)
+    } catch (e: unknown) {
+      setErro(e instanceof Error ? e.message : "Erro ao aprovar consulta.")
+      setDialogAprovar(false)
+    } finally {
+      setProcessando(false)
+    }
   }
 
-  const handleRecusar = () => {
-    if (solicitacaoSelecionada) {
-      setProcessadas([
-        {
-          id: solicitacaoSelecionada.id,
-          paciente: solicitacaoSelecionada.paciente,
-          dataDesejada: solicitacaoSelecionada.dataDesejada,
-          horarioDesejado: solicitacaoSelecionada.horarioDesejado,
-          status: "recusada",
-          dataProcessamento: "13 de Abril, 2026",
-          motivo: "Horário indisponível",
-          avatar: solicitacaoSelecionada.avatar,
-        },
-        ...processadas,
-      ])
-      setSolicitacoes(solicitacoes.filter((s) => s.id !== solicitacaoSelecionada.id))
+  async function recusar() {
+    if (!selecionada) return
+    setProcessando(true)
+    try {
+      const res = await fetch(`${API_URL}/api/v1/consultas/${selecionada.id}/recusar`, {
+        method: "PUT",
+        headers: { Authorization: `Bearer ${getToken()}` },
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.message ?? "Erro ao recusar.")
+      setConsultas(prev =>
+        prev.map(c => c.id === selecionada.id ? { ...c, status_consulta: "RECUSADA" } : c)
+      )
+      setDialogRecusar(false)
+      setDialogDetalhes(false)
+      setSelecionada(null)
+    } catch (e: unknown) {
+      setErro(e instanceof Error ? e.message : "Erro ao recusar consulta.")
+      setDialogRecusar(false)
+    } finally {
+      setProcessando(false)
     }
-    setDialogRecusar(false)
-    setDialogDetalhes(false)
-    setSolicitacaoSelecionada(null)
+  }
+
+  const consultasFiltradas = consultas.filter(c =>
+    c.paciente_nome.toLowerCase().includes(busca.toLowerCase())
+  )
+
+  const pendentes = consultasFiltradas.filter(c => c.status_consulta === "PENDENTE")
+
+  // Cada grupo de processadas já sai ordenado por data desc
+  const confirmadas = ordenarPorDataDesc(
+    consultasFiltradas.filter(c => c.status_consulta === "CONFIRMADA")
+  )
+  const canceladas = ordenarPorDataDesc(
+    consultasFiltradas.filter(c => c.status_consulta === "CANCELADA")
+  )
+  const recusadas = ordenarPorDataDesc(
+    consultasFiltradas.filter(c => c.status_consulta === "RECUSADA")
+  )
+
+  const totalProcessadas = confirmadas.length + canceladas.length + recusadas.length
+
+  // Card reutilizável para as seções de processadas
+  function CardConsultaProcessada({ consulta }: { consulta: Consulta }) {
+    return (
+      <Card
+        className={
+          consulta.status_consulta === "RECUSADA" ||
+          consulta.status_consulta === "CANCELADA"
+            ? "opacity-60"
+            : ""
+        }
+      >
+        <CardContent className="p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Avatar className="h-12 w-12">
+                <AvatarFallback className="bg-primary/10 text-primary">
+                  {getInitials(consulta.paciente_nome)}
+                </AvatarFallback>
+              </Avatar>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h3 className="font-semibold text-foreground">{consulta.paciente_nome}</h3>
+                  {getStatusBadge(consulta.status_consulta)}
+                </div>
+                <div className="mt-1 flex flex-wrap gap-3 text-sm text-muted-foreground">
+                  <span className="flex items-center gap-1">
+                    <Calendar className="h-3.5 w-3.5" />
+                    {formatarData(consulta.data_disponivel)}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Clock className="h-3.5 w-3.5" />
+                    {consulta.horario_inicio.slice(0, 5)}
+                  </span>
+                </div>
+              </div>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => { setSelecionada(consulta); setDialogDetalhes(true) }}
+            >
+              Detalhes
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    )
   }
 
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">
-          Solicitações de Agendamento
-        </h1>
-        <p className="mt-1 text-muted-foreground">
-          Gerencie as solicitações de consulta dos pacientes.
+        <h1 className="text-2xl font-bold text-foreground">Solicitações de Agendamento</h1>
+        <p className="text-muted-foreground">
+          Gerencie as solicitações de consulta dos seus pacientes
         </p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
+      {/* Cards de resumo */}
+      <div className="grid gap-4 sm:grid-cols-3">
         <Card>
-          <CardContent className="flex items-center gap-4 p-6">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-warning/10">
-              <Clock className="h-6 w-6 text-warning" />
+          <CardContent className="flex items-center gap-4 p-5">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-yellow-100">
+              <Clock className="h-6 w-6 text-yellow-700" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-foreground">{solicitacoes.length}</p>
+              <p className="text-2xl font-bold text-foreground">
+                {consultas.filter(c => c.status_consulta === "PENDENTE").length}
+              </p>
               <p className="text-sm text-muted-foreground">Pendentes</p>
             </div>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="flex items-center gap-4 p-6">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-success/10">
-              <Check className="h-6 w-6 text-success" />
+          <CardContent className="flex items-center gap-4 p-5">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-green-100">
+              <Check className="h-6 w-6 text-green-700" />
             </div>
             <div>
               <p className="text-2xl font-bold text-foreground">
-                {processadas.filter((p) => p.status === "aprovada").length}
+                {consultas.filter(c => c.status_consulta === "CONFIRMADA").length}
               </p>
-              <p className="text-sm text-muted-foreground">Aprovadas Hoje</p>
+              <p className="text-sm text-muted-foreground">Confirmadas</p>
             </div>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="flex items-center gap-4 p-6">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-destructive/10">
-              <X className="h-6 w-6 text-destructive" />
+          <CardContent className="flex items-center gap-4 p-5">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-red-100">
+              <X className="h-6 w-6 text-red-700" />
             </div>
             <div>
               <p className="text-2xl font-bold text-foreground">
-                {processadas.filter((p) => p.status === "recusada").length}
+                {consultas.filter(c => c.status_consulta === "RECUSADA").length}
               </p>
               <p className="text-sm text-muted-foreground">Recusadas</p>
             </div>
@@ -182,269 +269,293 @@ export default function Solicitacoes() {
         </Card>
       </div>
 
-      <Tabs defaultValue="pendentes" className="space-y-4">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <TabsList>
-            <TabsTrigger value="pendentes">
-              Pendentes ({solicitacoes.length})
-            </TabsTrigger>
-            <TabsTrigger value="processadas">Processadas</TabsTrigger>
-          </TabsList>
-          <div className="relative w-full sm:w-72">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              placeholder="Buscar paciente..."
-              value={busca}
-              onChange={(e) => setBusca(e.target.value)}
-              className="pl-10"
-            />
-          </div>
+      {erro && (
+        <div className="rounded-lg border border-destructive/50 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+          {erro}
+        </div>
+      )}
+
+      {/* Busca e Tabs */}
+      <div className="space-y-4">
+        <div className="relative w-full sm:w-72">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            placeholder="Buscar paciente..."
+            value={busca}
+            onChange={e => setBusca(e.target.value)}
+            className="pl-10"
+          />
         </div>
 
-        <TabsContent value="pendentes" className="space-y-4">
-          {solicitacoesFiltradas.length === 0 ? (
-            <Card>
-              <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-                <Calendar className="mb-4 h-12 w-12 text-muted-foreground" />
-                <h3 className="text-lg font-semibold text-foreground">Nenhuma solicitação pendente</h3>
-                <p className="text-sm text-muted-foreground">
-                  Não há solicitações aguardando aprovação no momento.
-                </p>
-              </CardContent>
-            </Card>
-          ) : (
-            solicitacoesFiltradas.map((solicitacao) => (
-              <Card key={solicitacao.id}>
-                <CardContent className="p-4">
-                  <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-                    <div className="flex items-start gap-4">
-                      <Avatar className="h-12 w-12">
-                        <AvatarImage src={solicitacao.avatar} alt={solicitacao.paciente} />
-                        <AvatarFallback className="bg-primary/10 text-primary">
-                          {solicitacao.paciente.split(" ").map((n) => n[0]).join("").slice(0, 2)}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <h3 className="font-semibold text-foreground">{solicitacao.paciente}</h3>
-                          <Badge className="bg-warning/10 text-warning">Pendente</Badge>
-                        </div>
-                        <p className="mt-1 text-sm text-muted-foreground line-clamp-1">
-                          {solicitacao.motivo}
-                        </p>
-                        <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
-                          <span className="flex items-center gap-1">
-                            <Calendar className="h-3.5 w-3.5" />
-                            {solicitacao.dataDesejada}
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <Clock className="h-3.5 w-3.5" />
-                            {solicitacao.horarioDesejado}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          setSolicitacaoSelecionada(solicitacao)
-                          setDialogDetalhes(true)
-                        }}
-                      >
-                        Ver Detalhes
-                      </Button>
-                      <Button
-                        size="sm"
-                        className="bg-success text-success-foreground hover:bg-success/90"
-                        onClick={() => {
-                          setSolicitacaoSelecionada(solicitacao)
-                          setDialogAprovar(true)
-                        }}
-                      >
-                        <Check className="mr-1 h-4 w-4" />
-                        Aprovar
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-destructive hover:bg-destructive/10"
-                        onClick={() => {
-                          setSolicitacaoSelecionada(solicitacao)
-                          setDialogRecusar(true)
-                        }}
-                      >
-                        <X className="mr-1 h-4 w-4" />
-                        Recusar
-                      </Button>
-                    </div>
-                  </div>
+        <Tabs defaultValue="pendentes">
+          <TabsList>
+            <TabsTrigger value="pendentes">
+              Pendentes ({pendentes.length})
+            </TabsTrigger>
+            <TabsTrigger value="processadas">
+              Processadas ({totalProcessadas})
+            </TabsTrigger>
+          </TabsList>
+
+          {/* Pendentes — sem alteração */}
+          <TabsContent value="pendentes" className="mt-4 space-y-3">
+            {carregando ? (
+              <div className="flex h-48 items-center justify-center">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              </div>
+            ) : pendentes.length === 0 ? (
+              <Card>
+                <CardContent className="flex flex-col items-center justify-center py-12">
+                  <FileText className="h-10 w-10 text-muted-foreground/50" />
+                  <p className="mt-3 font-medium text-foreground">Nenhuma solicitação pendente</p>
+                  <p className="text-sm text-muted-foreground">Você está em dia!</p>
                 </CardContent>
               </Card>
-            ))
-          )}
-        </TabsContent>
-
-        <TabsContent value="processadas" className="space-y-4">
-          {processadas.map((item) => (
-            <Card key={item.id} className={item.status === "recusada" ? "opacity-60" : ""}>
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <Avatar className="h-12 w-12">
-                      <AvatarImage src={item.avatar} alt={item.paciente} />
-                      <AvatarFallback className="bg-primary/10 text-primary">
-                        {item.paciente.split(" ").map((n) => n[0]).join("").slice(0, 2)}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-semibold text-foreground">{item.paciente}</h3>
-                        {item.status === "aprovada" ? (
-                          <Badge className="bg-success/10 text-success">Aprovada</Badge>
-                        ) : (
-                          <Badge variant="secondary" className="text-muted-foreground">Recusada</Badge>
-                        )}
+            ) : (
+              pendentes.map(consulta => (
+                <Card key={consulta.id}>
+                  <CardContent className="p-4">
+                    <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                      <div className="flex items-start gap-3">
+                        <Avatar className="h-12 w-12">
+                          <AvatarFallback className="bg-primary/10 text-primary">
+                            {getInitials(consulta.paciente_nome)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <h3 className="font-semibold text-foreground">{consulta.paciente_nome}</h3>
+                            {getStatusBadge(consulta.status_consulta)}
+                          </div>
+                          {consulta.observacoes && (
+                            <p className="mt-1 text-sm text-muted-foreground line-clamp-1">
+                              {consulta.observacoes}
+                            </p>
+                          )}
+                          <div className="mt-2 flex flex-wrap gap-3 text-sm text-muted-foreground">
+                            <span className="flex items-center gap-1">
+                              <Calendar className="h-3.5 w-3.5" />
+                              {formatarData(consulta.data_disponivel)}
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <Clock className="h-3.5 w-3.5" />
+                              {consulta.horario_inicio.slice(0, 5)}
+                            </span>
+                          </div>
+                        </div>
                       </div>
-                      <div className="mt-1 flex items-center gap-3 text-sm text-muted-foreground">
-                        <span className="flex items-center gap-1">
-                          <Calendar className="h-3.5 w-3.5" />
-                          {item.dataDesejada} às {item.horarioDesejado}
-                        </span>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => { setSelecionada(consulta); setDialogDetalhes(true) }}
+                        >
+                          Ver detalhes
+                        </Button>
+                        <Button
+                          size="sm"
+                          className="bg-green-600 hover:bg-green-700 text-white gap-1"
+                          onClick={() => { setSelecionada(consulta); setDialogAprovar(true) }}
+                        >
+                          <Check className="h-4 w-4" />
+                          Aprovar
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-destructive hover:bg-destructive/10 gap-1"
+                          onClick={() => { setSelecionada(consulta); setDialogRecusar(true) }}
+                        >
+                          <X className="h-4 w-4" />
+                          Recusar
+                        </Button>
                       </div>
                     </div>
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    Processado em {item.dataProcessamento}
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </TabsContent>
-      </Tabs>
+                  </CardContent>
+                </Card>
+              ))
+            )}
+          </TabsContent>
 
+          {/* Processadas — ordenadas por data desc e separadas por status */}
+          <TabsContent value="processadas" className="mt-4 space-y-6">
+            {totalProcessadas === 0 ? (
+              <Card>
+                <CardContent className="flex flex-col items-center justify-center py-12">
+                  <FileText className="h-10 w-10 text-muted-foreground/50" />
+                  <p className="mt-3 font-medium text-foreground">Nenhuma consulta processada ainda</p>
+                </CardContent>
+              </Card>
+            ) : (
+              <>
+                {/* Confirmadas */}
+                {confirmadas.length > 0 && (
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      <Check className="h-4 w-4 text-green-600" />
+                      <h2 className="text-sm font-semibold text-foreground">
+                        Confirmadas ({confirmadas.length})
+                      </h2>
+                    </div>
+                    {confirmadas.map(consulta => (
+                      <CardConsultaProcessada key={consulta.id} consulta={consulta} />
+                    ))}
+                  </div>
+                )}
+
+                {/* Canceladas */}
+                {canceladas.length > 0 && (
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      <X className="h-4 w-4 text-gray-500" />
+                      <h2 className="text-sm font-semibold text-foreground">
+                        Canceladas ({canceladas.length})
+                      </h2>
+                    </div>
+                    {canceladas.map(consulta => (
+                      <CardConsultaProcessada key={consulta.id} consulta={consulta} />
+                    ))}
+                  </div>
+                )}
+
+                {/* Recusadas */}
+                {recusadas.length > 0 && (
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      <X className="h-4 w-4 text-red-500" />
+                      <h2 className="text-sm font-semibold text-foreground">
+                        Recusadas ({recusadas.length})
+                      </h2>
+                    </div>
+                    {recusadas.map(consulta => (
+                      <CardConsultaProcessada key={consulta.id} consulta={consulta} />
+                    ))}
+                  </div>
+                )}
+              </>
+            )}
+          </TabsContent>
+        </Tabs>
+      </div>
+
+      {/* Dialog Detalhes */}
       <Dialog open={dialogDetalhes} onOpenChange={setDialogDetalhes}>
-        <DialogContent>
+        <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>Detalhes da Solicitação</DialogTitle>
             <DialogDescription>
-              Informações completas sobre a solicitação de agendamento.
+              {selecionada && `${formatarData(selecionada.data_disponivel)} às ${selecionada.horario_inicio.slice(0, 5)}`}
             </DialogDescription>
           </DialogHeader>
-          {solicitacaoSelecionada && (
-            <div className="space-y-4 py-4">
-              <div className="flex items-center gap-4 rounded-lg bg-muted/50 p-4">
-                <Avatar className="h-14 w-14">
-                  <AvatarImage src={solicitacaoSelecionada.avatar} alt={solicitacaoSelecionada.paciente} />
+          {selecionada && (
+            <div className="space-y-4">
+              <div className="flex items-center gap-3 rounded-lg bg-muted/50 p-4">
+                <Avatar className="h-12 w-12">
                   <AvatarFallback className="bg-primary/10 text-primary text-lg">
-                    {solicitacaoSelecionada.paciente.split(" ").map((n) => n[0]).join("").slice(0, 2)}
+                    {getInitials(selecionada.paciente_nome)}
                   </AvatarFallback>
                 </Avatar>
                 <div>
-                  <p className="font-semibold text-foreground">{solicitacaoSelecionada.paciente}</p>
-                  <Badge className="mt-1 bg-warning/10 text-warning">Aguardando Aprovação</Badge>
+                  <p className="font-semibold text-foreground">{selecionada.paciente_nome}</p>
+                  {getStatusBadge(selecionada.status_consulta)}
                 </div>
               </div>
-
-              <div className="grid gap-3 text-sm">
-                <div className="flex items-center gap-3">
-                  <Mail className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-foreground">{solicitacaoSelecionada.email}</span>
+              <div className="space-y-2 text-sm">
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Mail className="h-4 w-4" />
+                  {selecionada.paciente_email}
                 </div>
-                <div className="flex items-center gap-3">
-                  <Phone className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-foreground">{solicitacaoSelecionada.telefone}</span>
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Calendar className="h-4 w-4" />
+                  {formatarData(selecionada.data_disponivel)}
                 </div>
-                <div className="flex items-center gap-3">
-                  <Calendar className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-foreground">{solicitacaoSelecionada.dataDesejada}</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Clock className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-foreground">{solicitacaoSelecionada.horarioDesejado}</span>
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Clock className="h-4 w-4" />
+                  {selecionada.horario_inicio.slice(0, 5)}
                 </div>
               </div>
-
-              <div>
-                <h4 className="mb-2 text-sm font-medium text-foreground">Motivo da Consulta</h4>
-                <p className="rounded-lg bg-muted/50 p-3 text-sm text-muted-foreground">
-                  {solicitacaoSelecionada.motivo}
-                </p>
-              </div>
+              {selecionada.observacoes && (
+                <div>
+                  <p className="text-sm font-medium text-foreground mb-1">Observações</p>
+                  <p className="rounded-lg bg-muted/50 p-3 text-sm text-muted-foreground">
+                    {selecionada.observacoes}
+                  </p>
+                </div>
+              )}
+              {selecionada.status_consulta === "PENDENTE" && (
+                <DialogFooter className="gap-2">
+                  <Button
+                    variant="ghost"
+                    className="text-destructive hover:bg-destructive/10"
+                    onClick={() => { setDialogDetalhes(false); setDialogRecusar(true) }}
+                  >
+                    <X className="mr-1 h-4 w-4" />
+                    Recusar
+                  </Button>
+                  <Button
+                    className="bg-green-600 hover:bg-green-700 text-white"
+                    onClick={() => { setDialogDetalhes(false); setDialogAprovar(true) }}
+                  >
+                    <Check className="mr-1 h-4 w-4" />
+                    Aprovar
+                  </Button>
+                </DialogFooter>
+              )}
             </div>
           )}
-          <DialogFooter className="gap-2 sm:gap-0">
-            <Button
-              variant="ghost"
-              className="text-destructive hover:bg-destructive/10"
-              onClick={() => {
-                setDialogDetalhes(false)
-                setDialogRecusar(true)
-              }}
-            >
-              <X className="mr-1 h-4 w-4" />
-              Recusar
-            </Button>
-            <Button
-              className="bg-success text-success-foreground hover:bg-success/90"
-              onClick={() => {
-                setDialogDetalhes(false)
-                setDialogAprovar(true)
-              }}
-            >
-              <Check className="mr-1 h-4 w-4" />
-              Aprovar
-            </Button>
-          </DialogFooter>
         </DialogContent>
       </Dialog>
 
+      {/* Dialog Aprovar */}
       <Dialog open={dialogAprovar} onOpenChange={setDialogAprovar}>
-        <DialogContent>
+        <DialogContent className="max-w-sm">
           <DialogHeader>
-            <DialogTitle>Confirmar Aprovação</DialogTitle>
+            <DialogTitle>Confirmar aprovação</DialogTitle>
             <DialogDescription>
-              Deseja aprovar a solicitação de {solicitacaoSelecionada?.paciente}?
+              Deseja aprovar a consulta de {selecionada?.paciente_nome}?
             </DialogDescription>
           </DialogHeader>
-          <div className="rounded-lg bg-muted/50 p-4 text-sm">
-            <p className="text-foreground">
-              <strong>Data:</strong> {solicitacaoSelecionada?.dataDesejada}
-            </p>
-            <p className="text-foreground">
-              <strong>Horário:</strong> {solicitacaoSelecionada?.horarioDesejado}
-            </p>
-          </div>
+          {selecionada && (
+            <div className="rounded-lg bg-muted/50 p-4 text-sm space-y-1">
+              <p><span className="text-muted-foreground">Data:</span> <span className="font-medium">{formatarData(selecionada.data_disponivel)}</span></p>
+              <p><span className="text-muted-foreground">Horário:</span> <span className="font-medium">{selecionada.horario_inicio.slice(0, 5)}</span></p>
+            </div>
+          )}
           <DialogFooter>
             <Button variant="outline" onClick={() => setDialogAprovar(false)}>
               Cancelar
             </Button>
-            <Button className="bg-success text-success-foreground hover:bg-success/90" onClick={handleAprovar}>
-              Confirmar Aprovação
+            <Button
+              className="bg-green-600 hover:bg-green-700 text-white"
+              disabled={processando}
+              onClick={aprovar}
+            >
+              {processando ? <Loader2 className="h-4 w-4 animate-spin" /> : "Confirmar aprovação"}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
+      {/* Dialog Recusar */}
       <Dialog open={dialogRecusar} onOpenChange={setDialogRecusar}>
-        <DialogContent>
+        <DialogContent className="max-w-sm">
           <DialogHeader>
-            <DialogTitle>Recusar Solicitação</DialogTitle>
+            <DialogTitle>Recusar solicitação</DialogTitle>
             <DialogDescription>
-              Deseja recusar a solicitação de {solicitacaoSelecionada?.paciente}?
+              Deseja recusar a consulta de {selecionada?.paciente_nome}?
+              O horário voltará a ficar disponível.
             </DialogDescription>
           </DialogHeader>
-          <p className="text-sm text-muted-foreground">
-            O paciente será notificado sobre a recusa e poderá solicitar outro horário.
-          </p>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDialogRecusar(false)}>
               Cancelar
             </Button>
-            <Button variant="destructive" onClick={handleRecusar}>
-              Confirmar Recusa
+            <Button
+              variant="destructive"
+              disabled={processando}
+              onClick={recusar}
+            >
+              {processando ? <Loader2 className="h-4 w-4 animate-spin" /> : "Confirmar recusa"}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -1,5 +1,6 @@
 import Link from "next/link"
-import { Heart, ArrowRight, UserPlus, LogIn } from "lucide-react"
+import Image from "next/image"
+import { ArrowRight, UserPlus, LogIn } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 export default function HomePage() {
@@ -9,11 +10,14 @@ export default function HomePage() {
       <header className="border-b border-border bg-card">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4">
           <div className="flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary">
-              <Heart className="h-5 w-5 text-primary-foreground" />
-            </div>
+            <img
+              src="/logouvv.png"
+              alt="UVV Saúde"
+              className="h-auto w-auto max-h-10 max-w-[50px] object-contain"
+            />
             <span className="text-lg font-bold text-foreground">UVV Saúde</span>
           </div>
+
           <div className="flex items-center gap-3">
             <Button variant="ghost" asChild>
               <Link href="/login">
@@ -21,6 +25,7 @@ export default function HomePage() {
                 Entrar
               </Link>
             </Button>
+
             <Button asChild>
               <Link href="/cadastro">
                 <UserPlus className="mr-2 h-4 w-4" />
@@ -34,14 +39,22 @@ export default function HomePage() {
       {/* Hero Section */}
       <section className="flex flex-1 flex-col items-center justify-center px-4 py-16">
         <div className="mx-auto flex w-full max-w-3xl flex-col items-center gap-8 text-center">
-          <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-primary">
-            <Heart className="h-10 w-10 text-primary-foreground" />
-          </div>
-          
+          <Image
+            src="/logouvv.png"
+            alt="UVV Saúde"
+            width={100}
+            height={100}
+            className="h-auto w-auto max-h-28 max-w-[220px] object-contain"
+            priority
+
+            
+          />
+
           <div className="space-y-4">
             <h1 className="text-balance text-4xl font-bold tracking-tight text-foreground md:text-5xl">
               Sua saúde em primeiro lugar
             </h1>
+
             <p className="mx-auto max-w-xl text-balance text-lg leading-relaxed text-muted-foreground">
               Plataforma inteligente para gestão de saúde. Conectando profissionais
               e pacientes de forma simples e eficiente.
@@ -55,6 +68,7 @@ export default function HomePage() {
                 <ArrowRight className="h-4 w-4" />
               </Link>
             </Button>
+
             <Button size="lg" variant="outline" asChild>
               <Link href="/login">
                 Já tenho conta
@@ -75,7 +89,7 @@ export default function HomePage() {
                 Agende consultas com nutricionistas e psicólogos em poucos cliques.
               </p>
             </div>
-            
+
             <div className="rounded-xl border border-border bg-card p-6 text-left">
               <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
                 <svg className="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -87,7 +101,7 @@ export default function HomePage() {
                 Profissionais podem configurar sua disponibilidade mensal.
               </p>
             </div>
-            
+
             <div className="rounded-xl border border-border bg-card p-6 text-left">
               <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
                 <svg className="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
